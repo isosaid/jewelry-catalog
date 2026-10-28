@@ -1,4 +1,4 @@
-<title>Ювелирные изделия</title>
+<title>The Goldsmith</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -49,7 +49,7 @@ button,input,select{font:inherit;color:inherit}
 header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;background:var(--chrome);backdrop-filter:blur(14px) saturate(1.4);-webkit-backdrop-filter:blur(14px) saturate(1.4);border-bottom:1px solid var(--line)}
 .top-in{display:flex;align-items:center;gap:14px;padding-block:12px}
 .brand{display:flex;flex-direction:column;line-height:1.1;margin-right:auto;min-width:0}
-.brand b{font-family:var(--f-display);font-size:19px;font-weight:400;letter-spacing:.13em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.brand b{font-family:var(--f-display);font-size:20px;font-weight:400;letter-spacing:.19em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .brand span{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
 .search{position:relative;flex:0 1 260px;min-width:0}
 .search input{width:100%;padding:9px 12px 9px 32px;border:1px solid var(--line);border-radius:2px;background:var(--surface-2)}
@@ -170,7 +170,7 @@ footer.page{border-top:1px solid var(--line);background:var(--chrome);backdrop-f
 
 <header class="top">
   <div class="wrap top-in">
-    <div class="brand"><b>Ювелирные изделия</b><span>Каталог коллекций · золото 585°</span></div>
+    <div class="brand"><b>The Goldsmith</b><span>Каталог ювелирных изделий · золото 585°</span></div>
     <div class="search">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
       <input id="q" type="search" placeholder="Поиск: оникс, серьги, AV-04…" aria-label="Поиск по каталогу">
@@ -534,7 +534,7 @@ function openDrawer(){
   drawer.querySelector("#dcopy").onclick=()=>{
     const items=CATALOG.filter(c=>state.sel.has(c.id));
     if(!items.length)return toast("Подборка пуста");
-    copy("Заявка на просчёт — ювелирные изделия\n\n"+items.map(specText).join("\n\n")+
+    copy("Заявка на просчёт — The Goldsmith\n\n"+items.map(specText).join("\n\n")+
       "\n\nПрошу рассчитать стоимость по перечисленным артикулам.");
   };
   drawSel();
