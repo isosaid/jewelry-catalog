@@ -75,6 +75,13 @@ nav.menu a:hover{color:var(--dark-ink);border-color:var(--gold-soft)}
 .shots-head h2{font-size:clamp(23px,3.4vw,31px);margin-right:auto}
 .shots-head .eyebrow{color:var(--dark-muted)}
 .shots-head a{font-size:14px;color:var(--gold-soft);text-decoration:none;border-bottom:1px solid currentColor;white-space:nowrap}
+.addbtn{display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 16px;border:1px solid var(--dark-line);border-radius:2px;background:rgba(236,236,239,.06);color:var(--dark-ink);cursor:pointer;font-size:14px;white-space:nowrap}
+.addbtn:hover{border-color:var(--gold-soft);background:rgba(236,236,239,.12)}
+.slide{position:relative}
+.drop{position:absolute;top:10px;right:10px;z-index:2;display:flex;gap:8px;align-items:center}
+.badge{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--dark-ink);background:rgba(10,10,13,.7);padding:5px 9px;border-radius:2px;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.del{width:30px;height:30px;border:none;border-radius:50%;background:rgba(10,10,13,.7);color:var(--dark-ink);display:grid;place-items:center;cursor:pointer;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.del:hover{background:#8C2230;color:#fff}
 .stage{position:relative}
 .rail{display:flex;gap:0;height:clamp(340px,64vh,680px);overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;overscroll-behavior-x:contain}
 .rail::-webkit-scrollbar{display:none}
@@ -137,8 +144,13 @@ nav.menu a:hover{color:var(--dark-ink);border-color:var(--gold-soft)}
         <p class="eyebrow">Съёмки</p>
         <h2>Каждая линия со всех ракурсов</h2>
       </div>
+      <button class="addbtn" id="addBtn" type="button">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        Добавить кадры
+      </button>
       <a href="gallery.html">Открыть во весь экран</a>
     </div>
+    <input type="file" id="addInput" accept="image/*" multiple hidden>
     <div class="stage">
       <div class="rail" id="rail" tabindex="0" aria-label="Съёмки изделий"></div>
       <button class="nav prev" id="prev" type="button" aria-label="Предыдущий кадр">
@@ -149,13 +161,13 @@ nav.menu a:hover{color:var(--dark-ink);border-color:var(--gold-soft)}
       </button>
     </div>
     <div class="dots" id="dots"></div>
-    <p class="hint">Листайте свайпом или стрелками</p>
+    <p class="hint" id="hint">Листайте свайпом или стрелками</p>
   </div>
 </section>
 
 
 <script>
-/* Порядок кадров: имена файлов в img/ */
+/* Встроенные кадры: имена файлов в img/ */
 const SHOTS = [
   "noir","smaragd","aquavela","rubis","amethyste","eclat","soleil",
   "rubelle","violetta","olivine","malachite","azur","lazuli"
@@ -163,47 +175,131 @@ const SHOTS = [
 
 const rail=document.getElementById("rail");
 const dots=document.getElementById("dots");
+const hint=document.getElementById("hint");
 let index=0;
+let own=[];   /* кадры, добавленные на этом устройстве: {id, url} */
 
-SHOTS.forEach((slug,i)=>{
-  const cell=document.createElement("div");
-  cell.className="slide";
-  const img=document.createElement("img");
-  img.src=`img/${slug}-look.webp`;
-  img.alt="";
-  img.decoding="async";
-  img.loading=i<2?"eager":"lazy";
-  cell.append(img);
-  rail.append(cell);
+/* ── Хранилище добавленных кадров (только в этом браузере) ── */
+const DB="goldsmith", STORE="shots";
+function open_db(){
+  return new Promise((res,rej)=>{
+    const r=indexedDB.open(DB,1);
+    r.onupgradeneeded=()=>{const d=r.result; if(!d.objectStoreNames.contains(STORE))d.createObjectStore(STORE,{keyPath:"id"})};
+    r.onsuccess=()=>res(r.result);
+    r.onerror=()=>rej(r.error);
+  });
+}
+async function db_all(){
+  try{
+    const d=await open_db();
+    return await new Promise((res,rej)=>{
+      const q=d.transaction(STORE).objectStore(STORE).getAll();
+      q.onsuccess=()=>res(q.result||[]); q.onerror=()=>rej(q.error);
+    });
+  }catch(e){return []}
+}
+async function db_put(rec){
+  try{
+    const d=await open_db();
+    await new Promise((res,rej)=>{
+      const q=d.transaction(STORE,"readwrite").objectStore(STORE).put(rec);
+      q.onsuccess=res; q.onerror=()=>rej(q.error);
+    });
+    return true;
+  }catch(e){return false}
+}
+async function db_del(id){
+  try{
+    const d=await open_db();
+    await new Promise((res,rej)=>{
+      const q=d.transaction(STORE,"readwrite").objectStore(STORE).delete(id);
+      q.onsuccess=res; q.onerror=()=>rej(q.error);
+    });
+  }catch(e){}
+}
 
-  const d=document.createElement("button");
-  d.type="button";
-  d.setAttribute("aria-label",`Кадр ${i+1} из ${SHOTS.length}`);
-  d.setAttribute("aria-current",i===0?"true":"false");
-  d.addEventListener("click",()=>go(i));
-  dots.append(d);
-});
+/* ── Сборка ленты ── */
+function frames(){
+  return [...SHOTS.map(s=>({src:`img/${s}-look.webp`})), ...own];
+}
+function build(){
+  const list=frames();
+  rail.innerHTML=""; dots.innerHTML="";
+  list.forEach((f,i)=>{
+    const cell=document.createElement("div");
+    cell.className="slide";
+    const img=document.createElement("img");
+    img.src=f.src; img.alt=""; img.decoding="async";
+    img.loading=i<2?"eager":"lazy";
+    cell.append(img);
 
-const cells=[...rail.children];
-const buttons=[...dots.children];
+    if(f.id){
+      const box=document.createElement("div");
+      box.className="drop";
+      const tag=document.createElement("span");
+      tag.className="badge"; tag.textContent="свой кадр";
+      const del=document.createElement("button");
+      del.type="button"; del.className="del"; del.setAttribute("aria-label","Убрать кадр");
+      del.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+      del.addEventListener("click",()=>remove(f.id));
+      box.append(tag,del);
+      cell.append(box);
+    }
+    rail.append(cell);
 
+    const d=document.createElement("button");
+    d.type="button";
+    d.setAttribute("aria-label",`Кадр ${i+1} из ${list.length}`);
+    d.addEventListener("click",()=>go(i));
+    dots.append(d);
+  });
+  if(index>list.length-1)index=Math.max(0,list.length-1);
+  mark();
+  hint.textContent = own.length
+    ? `Листайте свайпом или стрелками · ваших кадров: ${own.length} (видны только на этом устройстве)`
+    : "Листайте свайпом или стрелками";
+}
+function mark(){
+  [...dots.children].forEach((b,i)=>b.setAttribute("aria-current",i===index?"true":"false"));
+}
 function go(i){
-  index=Math.max(0,Math.min(SHOTS.length-1,i));
+  const cells=[...rail.children];
+  index=Math.max(0,Math.min(cells.length-1,i));
   rail.scrollTo({left:cells[index].offsetLeft,behavior:"smooth"});
   mark();
 }
-function mark(){ buttons.forEach((b,i)=>b.setAttribute("aria-current",i===index?"true":"false")) }
 
+/* ── Добавление и удаление ── */
+const input=document.getElementById("addInput");
+document.getElementById("addBtn").addEventListener("click",()=>input.click());
+input.addEventListener("change",async()=>{
+  const files=[...input.files].filter(f=>f.type.startsWith("image/"));
+  input.value="";
+  for(const file of files){
+    const rec={id:`${Date.now()}-${Math.random().toString(36).slice(2,8)}`,blob:file};
+    await db_put(rec);
+    own.push({id:rec.id,src:URL.createObjectURL(file)});
+  }
+  if(files.length){ build(); go(frames().length-files.length) }
+});
+async function remove(id){
+  const f=own.find(x=>x.id===id);
+  if(f)URL.revokeObjectURL(f.src);
+  own=own.filter(x=>x.id!==id);
+  await db_del(id);
+  build();
+}
+
+/* ── Листание ── */
 let raf=null;
 rail.addEventListener("scroll",()=>{
   if(raf)return;
   raf=requestAnimationFrame(()=>{
     raf=null;
     const i=Math.round(rail.scrollLeft/rail.clientWidth);
-    if(i!==index && i>=0 && i<SHOTS.length){index=i;mark()}
+    if(i!==index && i>=0 && i<rail.children.length){index=i;mark()}
   });
 });
-
 document.getElementById("prev").addEventListener("click",()=>go(index-1));
 document.getElementById("next").addEventListener("click",()=>go(index+1));
 rail.addEventListener("keydown",e=>{
@@ -215,5 +311,12 @@ document.getElementById("themeBtn").addEventListener("click",()=>{
   const r=document.documentElement;
   const dark=r.getAttribute("data-theme")==="dark" || (!r.getAttribute("data-theme") && matchMedia("(prefers-color-scheme:dark)").matches);
   r.setAttribute("data-theme",dark?"light":"dark");
+});
+
+build();
+db_all().then(recs=>{
+  if(!recs.length)return;
+  own=recs.map(r=>({id:r.id,src:URL.createObjectURL(r.blob)}));
+  build();
 });
 </script>
