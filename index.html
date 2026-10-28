@@ -1,580 +1,156 @@
 <title>The Goldsmith</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Marcellus&family=Jost:wght@300;400;500;600&display=swap">
 <style>
-/* Макет: липкая шапка → рельс фильтров слева (на телефоне сворачивается в чипы) → сетка карточек → полноэкранная карточка изделия */
+/* Макет: одна горизонтальная лента во весь экран, кадр за кадром, с привязкой прокрутки */
 :root{
-  --bg:#EDEDEF; --surface:#FFFFFF; --surface-2:#F6F5F7;
-  --ink:#15151A; --muted:#6B6B76; --line:#D9D9DF;
-  --gold:#8E6F2E; --gold-soft:#C9A961; --shadow:0 1px 2px rgba(20,20,30,.06),0 12px 32px rgba(20,20,30,.08);
-  --scrim:rgba(255,255,255,.90); --scrim-0:rgba(255,255,255,0); --photo:none;
-  --veil:rgba(238,236,233,.70); --chrome:rgba(255,255,255,.80);
-  --f-display:"Marcellus","Hoefler Text",Georgia,serif;
-  --f-body:"Jost","Avenir Next",-apple-system,"Segoe UI",sans-serif;
-  color-scheme:light;
-}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --bg:#121214; --surface:#1A1A1E; --surface-2:#212128;
-  --ink:#ECECEF; --muted:#9B9BA6; --line:#2E2E36;
-  --gold:#C9A24A; --gold-soft:#E0C98B; --shadow:0 1px 2px rgba(0,0,0,.4),0 14px 36px rgba(0,0,0,.45);
-  --scrim:rgba(18,18,21,.88); --scrim-0:rgba(18,18,21,0); --photo:brightness(.52) saturate(.9);
-  --veil:rgba(14,14,17,.80); --chrome:rgba(20,20,24,.80);
-  color-scheme:dark;
-}}
-:root[data-theme="dark"]{
-  --bg:#121214; --surface:#1A1A1E; --surface-2:#212128;
-  --ink:#ECECEF; --muted:#9B9BA6; --line:#2E2E36;
-  --gold:#C9A24A; --gold-soft:#E0C98B; --shadow:0 1px 2px rgba(0,0,0,.4),0 14px 36px rgba(0,0,0,.45);
-  --scrim:rgba(18,18,21,.88); --scrim-0:rgba(18,18,21,0); --photo:brightness(.52) saturate(.9);
-  --veil:rgba(14,14,17,.80); --chrome:rgba(20,20,24,.80);
+  --bg:#0A0A0C;
+  --fg:#ECECEF;
+  --dot:rgba(236,236,239,.30);
+  --dot-on:#D9B45B;
+  --chrome:rgba(12,12,14,.55);
   color-scheme:dark;
 }
-*{box-sizing:border-box}
-body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
-/* сквозная подложка: съёмка закреплена во вьюпорте, поверх — вуаль под цвет темы */
-.backdrop{position:fixed;inset:0;z-index:0;pointer-events:none;background:url("img/backdrop.webp") center center/cover no-repeat;filter:var(--photo)}
-.backdrop::after{content:"";position:absolute;inset:0;background:var(--veil)}
-.hero,main.work,footer.page{position:relative;z-index:1}
-body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:40;background:var(--surface)}
-h1,h2,h3,.display{font-family:var(--f-display);font-weight:400;text-wrap:balance;letter-spacing:.01em}
-img{display:block}
-button,input,select{font:inherit;color:inherit}
-:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
-.wrap{max-width:1280px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
-.eyebrow{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+html,body{height:100%}
+body{background:var(--bg);color:var(--fg);overflow:hidden;font-family:-apple-system,"Segoe UI",system-ui,sans-serif}
 
-/* ── Шапка ─────────────────────────────── */
-header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;background:var(--chrome);backdrop-filter:blur(14px) saturate(1.4);-webkit-backdrop-filter:blur(14px) saturate(1.4);border-bottom:1px solid var(--line)}
-.top-in{display:flex;align-items:center;gap:14px;padding-block:12px}
-.brand{display:flex;flex-direction:column;line-height:1.1;margin-right:auto;min-width:0}
-.brand b{font-family:var(--f-display);font-size:20px;font-weight:400;letter-spacing:.19em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.brand span{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
-.search{position:relative;flex:0 1 260px;min-width:0}
-.search input{width:100%;padding:9px 12px 9px 32px;border:1px solid var(--line);border-radius:2px;background:var(--surface-2)}
-.search svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);opacity:.5}
-.iconbtn{display:inline-flex;align-items:center;justify-content:center;gap:7px;height:38px;padding:0 12px;border:1px solid var(--line);background:var(--surface);border-radius:2px;cursor:pointer;white-space:nowrap}
-.iconbtn:hover{border-color:var(--gold)}
-.iconbtn .count{min-width:19px;height:19px;padding:0 5px;border-radius:10px;background:var(--gold);color:#FFFDF8;font-size:11px;font-weight:600;display:inline-flex;align-items:center;justify-content:center}
-
-/* ── Шапка-интро ───────────────────────── */
-.hero{position:relative;border-bottom:1px solid var(--line);overflow:hidden;isolation:isolate}
-.hero::before{content:"";position:absolute;inset:0;z-index:-2;background:url("img/backdrop.webp") right center/cover no-repeat;filter:var(--photo)}
-.hero::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(95deg,var(--scrim) 0%,var(--scrim) 34%,var(--scrim-0) 72%)}
-.hero-in{position:relative;display:grid;grid-template-columns:1.2fr .8fr;gap:36px;align-items:end;padding-block:44px 34px;min-height:360px}
-.facts div b{color:var(--ink)}
-.hero h1{font-size:clamp(30px,5vw,46px);margin:8px 0 0;line-height:1.1}
-.hero p{color:var(--muted);max-width:58ch;margin:12px 0 0}
-.facts{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;border-left:1px solid var(--line);padding-left:24px}
-.facts div b{font-family:var(--f-display);font-size:26px;display:block;line-height:1}
-.facts div span{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
-
-/* ── Рабочая область ───────────────────── */
-.work{display:grid;grid-template-columns:216px minmax(0,1fr);gap:34px;padding-block:28px 56px;align-items:start}
-.rail{position:sticky;top:calc(env(safe-area-inset-top,0px) + 74px);display:flex;flex-direction:column;gap:22px;background:var(--chrome);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:2px;padding:18px 16px}
-.fgroup h4{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin:0 0 9px;font-family:var(--f-body);font-weight:500}
-.fgroup label{display:flex;align-items:center;gap:9px;padding:3px 0;cursor:pointer;font-size:14px}
-.fgroup label input{accent-color:var(--gold);width:15px;height:15px}
-.fgroup label .n{margin-left:auto;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
-.swatch{width:11px;height:11px;border-radius:50%;border:1px solid rgba(128,128,128,.35);flex:none}
-.reset{align-self:start;background:none;border:none;padding:0;color:var(--gold);cursor:pointer;font-size:13px;border-bottom:1px solid currentColor}
-
-.bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}
-.bar .res{color:var(--muted);font-size:13px;margin-right:auto}
-.bar select{padding:8px 10px;border:1px solid var(--line);background:var(--surface);border-radius:2px}
-.chips{display:none;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:14px}
-.chip{flex:none;padding:7px 13px;border:1px solid var(--line);border-radius:999px;background:var(--surface);cursor:pointer;font-size:13px;white-space:nowrap}
-.chip[aria-pressed="true"]{border-color:var(--gold);background:var(--gold);color:#fff}
-
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(258px,1fr));gap:26px 22px}
-.card{background:var(--surface);border:1px solid var(--line);border-radius:2px;overflow:hidden;cursor:pointer;display:flex;flex-direction:column;text-align:left;padding:0;transition:border-color .2s,transform .2s,box-shadow .2s}
-.card:hover{border-color:var(--gold-soft);transform:translateY(-3px);box-shadow:var(--shadow)}
-.card .ph{position:relative;aspect-ratio:1/1;max-width:100%;overflow:hidden;background:var(--surface-2)}
-.card .ph img{width:100%;height:100%;object-fit:cover;transition:transform .5s ease}
-.card:hover .ph img{transform:scale(1.04)}
-.card .sku{position:absolute;top:10px;left:10px;background:rgba(255,255,255,.9);color:#15151A;padding:3px 8px;font-size:10px;letter-spacing:.1em;border-radius:2px}
-.card .fav{position:absolute;top:8px;right:8px;width:32px;height:32px;border:none;border-radius:50%;background:rgba(255,255,255,.9);display:grid;place-items:center;cursor:pointer;color:#15151A}
-.card .fav[aria-pressed="true"]{background:var(--gold);color:#fff}
-.card .body{padding:14px 16px 17px;display:flex;flex-direction:column;gap:6px;flex:1}
-.card h3{font-size:19px;margin:0}
-.card .line{font-size:13px;color:var(--muted);min-height:0}
-.card .meta{display:flex;align-items:baseline;gap:8px;margin-top:auto;padding-top:10px;border-top:1px solid var(--line)}
-.card .tone{display:inline-flex;align-items:center;gap:6px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
-.card .pcs{font-size:12px;color:var(--muted);margin-left:auto}
-.stone{display:inline-flex;align-items:center;gap:6px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
-.empty{border:1px dashed var(--line);padding:44px 20px;text-align:center;color:var(--muted);border-radius:2px}
-
-/* ── Карточка изделия ──────────────────── */
-.sheet{position:fixed;inset:0;z-index:60;background:rgba(10,10,14,.55);display:grid;place-items:center;padding:max(16px,env(safe-area-inset-left,0px));padding-top:calc(16px + env(safe-area-inset-top,0px));padding-bottom:calc(16px + env(safe-area-inset-bottom,0px))}
-.sheet-in{background:var(--surface);width:min(1080px,100%);max-height:100%;overflow:auto;border-radius:2px;box-shadow:var(--shadow);position:relative}
-.sheet-bar{position:sticky;top:0;z-index:3;display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--surface);border-bottom:1px solid var(--line)}
-.sheet-bar .eyebrow{margin-right:auto}
-.look{width:100%;max-width:100%;height:clamp(170px,34vh,330px);object-fit:cover;object-position:center;border-bottom:1px solid var(--line);cursor:zoom-in;display:block}
-.look.full{height:auto;object-fit:contain;cursor:zoom-out}
-.lookhint{display:flex;align-items:center;gap:8px;padding:8px 14px;border-bottom:1px solid var(--line);background:var(--surface-2);font-size:12px;color:var(--muted)}
-.lookhint button{margin-left:auto;background:none;border:none;color:var(--gold);cursor:pointer;font-size:12px;border-bottom:1px solid currentColor;padding:0}
-.sheet-body{padding:24px;display:grid;grid-template-columns:1.15fr .85fr;gap:30px;align-items:start}
-.sheet h2{font-size:clamp(26px,4vw,36px);margin:6px 0 0}
-.sheet .desc{color:var(--muted);margin:12px 0 0;max-width:62ch}
-table.spec{width:100%;border-collapse:collapse;font-size:14px}
-table.spec th,table.spec td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
-table.spec thead th{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:500}
-table.spec td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
-.tscroll{overflow-x:auto;margin-top:18px}
-.kv{display:grid;grid-template-columns:auto 1fr;gap:7px 16px;font-size:14px;margin-top:4px}
-.kv dt{color:var(--muted)}
-.kv dd{margin:0;text-align:right}
-.panel{background:var(--surface-2);border:1px solid var(--line);padding:18px;border-radius:2px}
-.total{display:flex;align-items:baseline;justify-content:space-between;margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
-.total b{font-family:var(--f-display);font-size:24px;font-variant-numeric:tabular-nums}
-.cta{width:100%;margin-top:14px;height:44px;border:1px solid var(--gold);background:var(--gold);color:#fff;border-radius:2px;cursor:pointer;letter-spacing:.06em;font-weight:500}
-.cta.ghost{background:none;color:var(--gold);margin-top:8px}
-.note{font-size:12px;color:var(--muted);margin-top:12px}
-
-/* ── Подборка ──────────────────────────── */
-.drawer{position:fixed;top:0;right:0;bottom:0;width:min(400px,100%);z-index:70;background:var(--surface);border-left:1px solid var(--line);box-shadow:var(--shadow);display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);padding-right:env(safe-area-inset-right,0px)}
-.drawer header{display:flex;align-items:center;gap:10px;padding:16px;border-bottom:1px solid var(--line)}
-.drawer header h3{margin:0;font-size:20px;margin-right:auto}
-.drawer .list{flex:1;overflow:auto;padding:8px 16px}
-.drow{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);align-items:center}
-.drow img{width:56px;height:56px;object-fit:cover;flex:none;border-radius:2px}
-.drow .t{flex:1;min-width:0}
-.drow .t b{display:block;font-family:var(--f-display);font-weight:400;font-size:16px}
-.drow .t span{font-size:12px;color:var(--muted)}
-.drow .p{font-variant-numeric:tabular-nums;white-space:nowrap}
-.drow button{border:none;background:none;color:var(--muted);cursor:pointer;padding:4px}
-.drawer footer{padding:16px;border-top:1px solid var(--line)}
-.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(22px + env(safe-area-inset-bottom,0px));z-index:90;background:var(--ink);color:var(--bg);padding:11px 18px;border-radius:2px;font-size:14px;box-shadow:var(--shadow)}
-
-footer.page{border-top:1px solid var(--line);background:var(--chrome);backdrop-filter:blur(14px) saturate(1.4);-webkit-backdrop-filter:blur(14px) saturate(1.4)}
-.foot-in{display:flex;flex-wrap:wrap;gap:18px 34px;padding-block:26px;color:var(--muted);font-size:13px}
-.foot-in b{color:var(--ink);font-weight:500;display:block;font-size:14px;margin-bottom:3px}
-
-@media (max-width:900px){
-  .hero::before{background-position:center right 18%}
-  .hero::after{background:linear-gradient(170deg,var(--scrim) 0%,var(--scrim) 68%,var(--scrim-0) 100%)}
-  .hero-in{grid-template-columns:1fr;gap:22px;align-items:start;min-height:0}
-  .facts{border-left:none;border-top:1px solid var(--line);padding-left:0;padding-top:18px}
-  .work{grid-template-columns:1fr;gap:0}
-  .rail{display:none}
-  .chips{display:flex}
-  .sheet-body{grid-template-columns:1fr;gap:22px;padding:18px}
-  .search{flex:1}
-  .brand span{display:none}
+.rail{
+  height:100%;display:flex;
+  overflow-x:auto;overflow-y:hidden;
+  scroll-snap-type:x mandatory;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:none;overscroll-behavior-x:contain;
 }
-@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+.rail::-webkit-scrollbar{display:none}
+
+.slide{
+  flex:0 0 100%;min-width:0;height:100%;
+  scroll-snap-align:center;scroll-snap-stop:always;
+  display:grid;place-items:center;
+  padding:max(8px,env(safe-area-inset-left,0px)) max(8px,env(safe-area-inset-right,0px));
+}
+.slide img{
+  max-width:100%;max-height:100%;width:auto;height:auto;
+  object-fit:contain;display:block;
+  transition:transform .35s ease;transform-origin:center center;
+  cursor:zoom-in;
+}
+.slide img.zoom{transform:scale(1.9);cursor:zoom-out}
+
+/* Стрелки — только там, где есть курсор */
+.nav{
+  position:fixed;top:50%;transform:translateY(-50%);z-index:3;
+  width:46px;height:46px;border:none;border-radius:50%;
+  background:var(--chrome);color:var(--fg);
+  display:none;place-items:center;cursor:pointer;
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+}
+.nav:hover{background:rgba(12,12,14,.8)}
+.nav.prev{left:calc(14px + env(safe-area-inset-left,0px))}
+.nav.next{right:calc(14px + env(safe-area-inset-right,0px))}
+@media (hover:hover) and (pointer:fine){.nav{display:grid}}
+
+/* Точки */
+.dots{
+  position:fixed;left:0;right:0;z-index:3;
+  bottom:calc(16px + env(safe-area-inset-bottom,0px));
+  display:flex;justify-content:center;align-items:center;gap:9px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+  flex-wrap:wrap;pointer-events:none;
+}
+.dots button{
+  pointer-events:auto;
+  width:7px;height:7px;padding:0;border:none;border-radius:50%;
+  background:var(--dot);cursor:pointer;transition:background .25s,transform .25s;
+}
+.dots button[aria-current="true"]{background:var(--dot-on);transform:scale(1.5)}
+
+:focus-visible{outline:2px solid var(--dot-on);outline-offset:3px}
+@media (prefers-reduced-motion:reduce){.rail{scroll-behavior:auto}.slide img{transition:none}}
 </style>
 
-<div class="backdrop" aria-hidden="true"></div>
+<div class="rail" id="rail" tabindex="0" aria-label="Фотографии изделий"></div>
 
-<header class="top">
-  <div class="wrap top-in">
-    <div class="brand"><b>The Goldsmith</b><span>Каталог ювелирных изделий · золото 585°</span></div>
-    <div class="search">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-      <input id="q" type="search" placeholder="Поиск: оникс, серьги, AV-04…" aria-label="Поиск по каталогу">
-    </div>
-    <button class="iconbtn" id="themeBtn" title="Светлая или тёмная тема" aria-label="Переключить тему">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg>
-    </button>
-    <button class="iconbtn" id="selBtn">Подборка <span class="count" id="selCount">0</span></button>
-  </div>
-</header>
+<button class="nav prev" id="prev" type="button" aria-label="Предыдущий кадр">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
+</button>
+<button class="nav next" id="next" type="button" aria-label="Следующий кадр">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>
+</button>
 
-<section class="hero">
-  <div class="wrap hero-in">
-    <div>
-      <p class="eyebrow">Коллекции сезона · Осень–зима 2026</p>
-      <h1>Тринадцать линий в золоте 585°</h1>
-      <p>Каждая линия собрана как законченный комплект: серьги, колье или подвеска и, где это уместно, кольцо. Камни подбираются партиями по цвету и калибру, оправы — ручная закрепка. Сроки изготовления под заказ: 10–18 рабочих дней.</p>
-    </div>
-    <div class="facts">
-      <div><b>13</b><span>линий</span></div>
-      <div><b>27</b><span>изделий</span></div>
-      <div><b>585°</b><span>проба</span></div>
-    </div>
-  </div>
-</section>
-
-<main class="wrap work">
-  <aside class="rail" id="rail"></aside>
-  <div>
-    <div class="chips" id="chips"></div>
-    <div class="bar">
-      <span class="res" id="res"></span>
-      <label class="eyebrow" for="sort">Сортировка</label>
-      <select id="sort">
-        <option value="rec">по порядку каталога</option>
-        <option value="name">по названию</option>
-        <option value="stone">по камню</option>
-        <option value="pcs">по числу изделий</option>
-      </select>
-    </div>
-    <div class="grid" id="grid"></div>
-    <div class="empty" id="empty" hidden>По этим фильтрам ничего не нашлось. Снимите один из них или очистите поиск.</div>
-  </div>
-</main>
-
-<footer class="page">
-  <div class="wrap foot-in">
-    <div><b>Заказ и примерка</b>Худжанд, предварительная запись<br>Пн–Сб, 10:00–19:00</div>
-    <div><b>Изготовление</b>10–18 рабочих дней<br>Размер кольца и длина цепи — по мерке</div>
-    <div><b>Гарантия</b>24 месяца на закрепку<br>Бесплатная чистка и полировка</div>
-    <div><b>Стоимость</b>рассчитывается по запросу<br>после выбора камня и размера</div>
-  </div>
-</footer>
+<div class="dots" id="dots"></div>
 
 <script>
-/* ── Данные каталога: правьте здесь ─────────────────────── */
-const CATALOG = [
-  { id:"AV-01", slug:"noir", name:"Нуар", line:"Колье в два ряда и пусеты",
-    stone:"Оникс", color:"#111114", metal:"Золото 585°, жёлтое", types:["Колье","Серьги"],
-    desc:"Два яруса якорной цепи с подвижными подвесками из чёрного оникса огранки «роза»: верхний ряд садится по основанию шеи, нижний ложится на ключицы. Пусеты повторяют ту же овальную форму в увеличенном калибре.",
-    pieces:[
-      {art:"AV-01-N", n:"Колье двухрядное", spec:"Оникс овал 6×4 мм · 15 шт · цепь якорная 1,2 мм", size:"38 + 5 см", w:"8,4 г", price:5900},
-      {art:"AV-01-E", n:"Пусеты", spec:"Оникс овал 10×8 мм · глухой каст · штифт с гайкой", size:"10×8 мм", w:"3,2 г", price:3100}
-    ],
-    care:"Оникс не любит ультразвук и бытовую химию: протирайте сухой фланелью." },
-
-  { id:"AV-02", slug:"smaragd", name:"Смарагд", line:"Кольцо и пусеты с каплей",
-    stone:"Изумруд", color:"#0E6B4A", metal:"Золото 585°, жёлтое", types:["Кольца","Серьги"],
-    desc:"Центральная груша в четырёх крупных шариковых крапанах, с одной стороны — несимметричный полуореол из круглых камней двух оттенков зелёного. Шинка круглая, 1,8 мм, без утолщения — комфортна при ежедневной носке.",
-    pieces:[
-      {art:"AV-02-R", n:"Кольцо", spec:"Изумруд груша 12×8 мм · ореол 2,5 мм · 6 шт", size:"16–19,5", w:"4,1 г", price:9800},
-      {art:"AV-02-E", n:"Пусеты", spec:"Изумруд груша 9×6 мм · ореол 2 мм · 5 шт на серьгу", size:"14×10 мм", w:"3,6 г", price:8400}
-    ],
-    care:"Снимайте кольцо при работе руками: у груши открытый острый угол." },
-
-  { id:"AV-03", slug:"aquavela", name:"Аква Вела", line:"Подвеска и серьги-веер",
-    stone:"Амазонит", color:"#3FB5B0", metal:"Золото 585°, жёлтое", types:["Подвески","Серьги"],
-    desc:"Веер из цельного амазонита с живым рисунком прожилок, по нижней дуге — дорожка фианитов в глухой оправе. Кап в форме шатра и подвижная петля: подвеска и серьги мягко качаются при движении.",
-    pieces:[
-      {art:"AV-03-P", n:"Подвеска с цепью", spec:"Амазонит веер 16×14 мм · 13 фианитов 1,2 мм", size:"цепь 45 см", w:"4,8 г", price:4700},
-      {art:"AV-03-E", n:"Серьги на пусете", spec:"Амазонит веер 13×11 мм · 11 фианитов 1,2 мм", size:"26 мм длина", w:"4,2 г", price:4300}
-    ],
-    care:"Амазонит мягкий (5,5 по Моосу) — храните отдельно от твёрдых камней." },
-
-  { id:"AV-04", slug:"rubis", name:"Рубис Рояль", line:"Колье-цепь и серьги-клаймберы",
-    stone:"Рубин", color:"#C8103F", metal:"Золото 585°, жёлтое", types:["Колье","Серьги"],
-    desc:"Массивное якорное звено прерывается семью овалами рубинового корунда — линия камней ложится ровно в основание шеи. Клаймберы повторяют градиент: от 3 мм у мочки до 7×5 мм у края уха.",
-    pieces:[
-      {art:"AV-04-N", n:"Колье-цепь", spec:"Корунд овал 8×6 мм · 7 шт · звено 5,5 мм", size:"42 + 4 см", w:"14,6 г", price:12900},
-      {art:"AV-04-E", n:"Серьги-клаймберы", spec:"Корунд овал 7×5 и круг 3 мм · 4 шт на серьгу", size:"24 мм дуга", w:"4,4 г", price:6200},
-      {art:"AV-04-C", n:"Серьги-клипсы", spec:"Тот же набор камней на клипсовом замке", size:"22 мм", w:"4,9 г", price:6600}
-    ],
-    care:"Корунд твёрдый, но замок клаймера юстируется по уху при примерке." },
-
-  { id:"AV-05", slug:"amethyste", name:"Каскад", line:"Серьги-кисти, кольцо и подвеска",
-    stone:"Аметист", color:"#6B3FA0", metal:"Золото 585°, жёлтое", types:["Серьги","Кольца","Подвески"],
-    desc:"Упрощённая оправа: один ряд крупных шариков по контуру капли вместо двойной зерни. От оправы спускается кисть из двенадцати цепочек якорного плетения со стерженьками на концах; кисть снимается, и серьги носятся как пусеты.",
-    pieces:[
-      {art:"AV-05-E", n:"Серьги-кисти", spec:"Аметист груша 14×10 мм · кисть 12 нитей, съёмная", size:"85 мм общая длина", w:"9,7 г", price:11400},
-      {art:"AV-05-R", n:"Кольцо", spec:"Аметист груша 11×8 мм · раздвоенная шинка", size:"16–19", w:"3,8 г", price:5600},
-      {art:"AV-05-P", n:"Подвеска с цепью", spec:"Аметист груша 12×9 мм · цепь якорная 1,1 мм", size:"цепь 45 см", w:"4,3 г", price:5100}
-    ],
-    care:"Аметист выцветает на прямом солнце — не оставляйте на подоконнике." },
-
-  { id:"AV-06", slug:"eclat", name:"Эклат Нуар", line:"Серьги-шандельеры и подвеска",
-    stone:"Оникс", color:"#111114", metal:"Золото 585°, жёлтое", types:["Серьги","Подвески"],
-    desc:"Вечерняя линия по эскизам с чертёжного листа: верхушка-маркиз, ажурный картуш и три капли оникса — центральная крупнее боковых. Каркас полый, поэтому при длине 58 мм серьги почти не тянут мочку.",
-    pieces:[
-      {art:"AV-06-E", n:"Серьги-шандельеры", spec:"Оникс: маркиз 8×4, груша 12×8 и 9×6 мм, круг 3 мм", size:"58 мм длина", w:"7,9 г", price:10600},
-      {art:"AV-06-P", n:"Подвеска с цепью", spec:"Та же композиция · цепь якорная 1,1 мм", size:"52 мм · цепь 45 см", w:"6,5 г", price:8200}
-    ],
-    care:"Ажур чистится мягкой кистью с мыльным раствором, без ультразвука." },
-
-  { id:"AV-07", slug:"soleil", name:"Солей", line:"Серьги на английском замке и подвеска",
-    stone:"Цитрин", color:"#E09A24", metal:"Золото 585°, жёлтое", types:["Серьги","Подвески"],
-    desc:"Крупная груша медового цитрина перехвачена двумя золотыми шевронами с паве — приём держит камень и задаёт геометрию. Над камнем маркизовая вставка из фианитов, английский замок с дорожкой по дуге.",
-    pieces:[
-      {art:"AV-07-E", n:"Серьги английский замок", spec:"Цитрин груша 14×9 мм · 34 фианита 1,0–2,0 мм", size:"42 мм длина", w:"6,8 г", price:7900},
-      {art:"AV-07-P", n:"Подвеска с цепью", spec:"Цитрин груша 15×10 мм · 22 фианита · цепь 1,1 мм", size:"цепь 45 см", w:"5,2 г", price:6400}
-    ],
-    care:"Паве проверяйте раз в год: оправа тонкая, камни садятся на лак." },
-
-  { id:"AV-08", slug:"rubelle", name:"Рубелль", line:"Серьги-веер с перламутром",
-    stone:"Рубеллит", color:"#D4145A", metal:"Золото 585°, розовое", tone:"Розовое", types:["Серьги"],
-    desc:"Самая трудоёмкая вещь сезона: веер набран из пяти лепестков перламутра между золотыми рёбрами, промежутки заполнены паве. Выше — груша рубеллита и круглый камень на шарнире, верхушка-веер повторяет мотив в миниатюре. Обратная сторона ажурная, с медовой сеткой — изделие читается и со спины.",
-    pieces:[
-      {art:"AV-08-E", n:"Серьги английский замок", spec:"Рубеллит груша 9×6 мм · перламутр 5 сегментов · паве 118 камней 0,9–3,0 мм", size:"48 мм длина", w:"9,3 г", price:16800}
-    ],
-    care:"Перламутр боится парфюма и воды: надевайте последним, снимайте первым." },
-
-  { id:"AV-09", slug:"violetta", name:"Виолетта", line:"Серьги в два овала и кольцо",
-    stone:"Аметист", color:"#6B3FA0", metal:"Золото 585°, жёлтое", types:["Серьги","Кольца"],
-    desc:"Два овала один под другим: верхний в ореоле из белых камней, нижний — в двойном, где внешний ряд набран мелкими аметистами в цвет центра. Нижняя часть на шарнире и качается отдельно от верхней. Галерея решена ажурной сеткой, поэтому крупная вещь остаётся лёгкой.",
-    pieces:[
-      {art:"AV-09-E", n:"Серьги английский замок", spec:"Аметист овал 14×10 и 9×7 мм · ореолы: 38 белых и 26 аметистов на серьгу", size:"42 мм длина", w:"11,2 г", price:13900},
-      {art:"AV-09-R", n:"Кольцо", spec:"Аметист овал 12×9 мм · двойной ореол · камни по плечам шинки", size:"16–19,5", w:"6,4 г", price:7400}
-    ],
-    care:"Двойной ореол чистите кистью: в нижнем ряду копится крем для рук." },
-
-  { id:"AV-10", slug:"olivine", name:"Оливин", line:"Серьги и кольцо с листом",
-    stone:"Зелёный кварц", color:"#6E7B3C", metal:"Золото 585°, жёлтое", types:["Серьги","Кольца"],
-    desc:"Два овала зелёного кварца лежат по диагонали, их обнимает полированный золотой лист — гладкая масса металла держит композицию без единого мелкого камня. Форма закрывает мочку целиком, а кольцо повторяет тот же разворот на раздвоенной шинке.",
-    pieces:[
-      {art:"AV-10-E", n:"Серьги английский замок", spec:"Зелёный кварц овал 9×7 и 8×6 мм · крапановая закрепка", size:"21 мм высота", w:"5,9 г", price:6900},
-      {art:"AV-10-R", n:"Кольцо", spec:"Зелёный кварц овал 11×9 и 9×7 мм · раздвоенная шинка", size:"16–20", w:"5,1 г", price:5400}
-    ],
-    care:"Полированный лист собирает царапины — храните в отдельном мешочке." },
-
-  { id:"AV-11", slug:"malachite", name:"Малахит", line:"Серьги-подвесы и кольцо с розеткой",
-    stone:"Малахит", color:"#1E7A4D", metal:"Золото 585°, жёлтое", types:["Серьги","Кольца"],
-    desc:"Круглый кабошон малахита с характерными концентрическими слоями — рисунок у каждой пары свой, одинаковых не бывает. По кругу розетка из шестнадцати камней через один: тёмный хромдиопсид и светлый хризолит. Дужка английского замка выложена той же чередой, галерея сзади ажурная.",
-    pieces:[
-      {art:"AV-11-E", n:"Серьги английский замок", spec:"Малахит кабошон 10 мм · розетка 16 камней 2,5 мм · дужка 12 камней 2 мм", size:"34 мм длина", w:"6,6 г", price:7600},
-      {art:"AV-11-R", n:"Кольцо", spec:"Малахит кабошон 11 мм · розетка 16 камней 2,5–3 мм · ажурная галерея", size:"16–19,5", w:"5,4 г", price:5900}
-    ],
-    care:"Малахит мягкий и не терпит кислот: снимайте перед уборкой и душем." },
-
-  { id:"AV-12", slug:"azur", name:"Азюр", line:"Серьги и подвеска с двойной петлёй",
-    stone:"Голубой топаз", color:"#4FB3DC", metal:"Золото 585°, белое", tone:"Белое", types:["Серьги","Подвески"],
-    desc:"Лента золота дважды перекручивается и образует две петли одна над другой: в верхней — груша поменьше, из нижней свободно свисает крупная. Одна сторона ленты выложена паве, другая оставлена полированной, поэтому при повороте вещь то вспыхивает, то гаснет. Подвеска длинная, 46 мм — рассчитана на открытый вырез.",
-    pieces:[
-      {art:"AV-12-E", n:"Серьги английский замок", spec:"Топаз груша 8×5 и 6×4 мм · паве 46 камней 1,0–1,3 мм", size:"38 мм длина", w:"5,6 г", price:8900},
-      {art:"AV-12-P", n:"Подвеска с цепью", spec:"Топаз груша 12×8 и 7×5 мм · паве 52 камня · цепь якорная 1,0 мм", size:"46 мм · цепь 45 см", w:"4,9 г", price:7300}
-    ],
-    care:"Родиевое покрытие обновляется раз в два-три года — услуга бесплатна." },
-
-  { id:"AV-13", slug:"lazuli", name:"Лазурит", line:"Серьги-капли и кольцо-маркиз",
-    stone:"Лазурит", color:"#1F3C94", metal:"Золото 585°, жёлтое", types:["Серьги","Кольца"],
-    desc:"Крупная капля лазурита с золотыми вкраплениями пирита, по её поверхности вьётся золотой завиток в паве — он не держит камень, а лежит поверх, как роспись. Верх собран из розетки и круглого камня на шарнире, изнанка — ажурный вензель. Кольцо решено иначе: маркиз в четырёх лепестковых крапанах, каждый выложен мелкими камнями.",
-    pieces:[
-      {art:"AV-13-E", n:"Серьги английский замок", spec:"Лазурит кабошон-груша 26×15 мм · паве 94 камня 1,0–1,8 мм", size:"52 мм длина", w:"12,8 г", price:14200},
-      {art:"AV-13-R", n:"Кольцо", spec:"Лазурит маркиз 20×12 мм · 4 лепестковых крапана с паве", size:"16–19,5", w:"7,6 г", price:8600}
-    ],
-    care:"Лазурит пористый: не держите в воде, снимайте перед кремом и духами." }
+/* Порядок кадров: имена файлов в img/ */
+const SHOTS = [
+  "noir","smaragd","aquavela","rubis","amethyste","eclat","soleil",
+  "rubelle","violetta","olivine","malachite","azur","lazuli"
 ];
 
-/* ── Состояние ──────────────────────────────────────────── */
-const KEY="jewelry.sel.v1";
-const toneOf=c=>c.tone||"Жёлтое";
-const TONE_LABEL={"Жёлтое":"Жёлтое золото","Розовое":"Розовое золото","Белое":"Белое золото"};
-const TONE_DOT={"Жёлтое":"#D9B45B","Розовое":"#E3A08A","Белое":"#DCDEE3"};
-const state={stones:new Set(),types:new Set(),tones:new Set(),q:"",sort:"rec",sel:new Set()};
+const rail=document.getElementById("rail");
+const dots=document.getElementById("dots");
+let index=0;
 
-try{const s=localStorage.getItem(KEY); if(s) JSON.parse(s).forEach(x=>state.sel.add(x));}catch(e){}
-const save=()=>{try{localStorage.setItem(KEY,JSON.stringify([...state.sel]))}catch(e){}};
+SHOTS.forEach((slug,i)=>{
+  const fig=document.createElement("div");
+  fig.className="slide";
+  const img=document.createElement("img");
+  img.src=`img/${slug}-look.webp`;
+  img.alt="";
+  img.decoding="async";
+  img.loading=i<2?"eager":"lazy";
+  img.addEventListener("click",()=>img.classList.toggle("zoom"));
+  fig.append(img);
+  rail.append(fig);
 
-const $=s=>document.querySelector(s);
-const el=(t,c,h)=>{const n=document.createElement(t); if(c)n.className=c; if(h!=null)n.innerHTML=h; return n};
-
-/* ── Фильтры ────────────────────────────────────────────── */
-const STONES=[...new Set(CATALOG.map(c=>c.stone))];
-const TYPES=[...new Set(CATALOG.flatMap(c=>c.types))];
-const TONES=[...new Set(CATALOG.map(toneOf))];
-const countStone=s=>CATALOG.filter(c=>c.stone===s).length;
-const countType=t=>CATALOG.filter(c=>c.types.includes(t)).length;
-const countTone=t=>CATALOG.filter(c=>toneOf(c)===t).length;
-
-function buildRail(){
-  const rail=$("#rail"); rail.innerHTML="";
-  const g1=el("div","fgroup","<h4>Камень</h4>");
-  STONES.forEach(s=>{
-    const l=el("label","",`<input type="checkbox" value="${s}" data-k="stones"><span class="swatch" style="background:${CATALOG.find(c=>c.stone===s).color}"></span>${s}<span class="n">${countStone(s)}</span>`);
-    g1.append(l);
-  });
-  const g2=el("div","fgroup","<h4>Изделие</h4>");
-  TYPES.forEach(t=>{
-    g2.append(el("label","",`<input type="checkbox" value="${t}" data-k="types">${t}<span class="n">${countType(t)}</span>`));
-  });
-  const g3=el("div","fgroup","<h4>Металл</h4>");
-  TONES.forEach(t=>{
-    g3.append(el("label","",`<input type="checkbox" value="${t}" data-k="tones"><span class="swatch" style="background:${TONE_DOT[t]}"></span>${TONE_LABEL[t]} 585°<span class="n">${countTone(t)}</span>`));
-  });
-  const hint=el("p","","Под заказ любая линия повторяется в другом оттенке золота — тот же артикул с индексом W, R или Y.");
-  hint.style.cssText="margin:9px 0 0;font-size:13px;color:var(--muted)";
-  g3.append(hint);
-  const rst=el("button","reset","Сбросить фильтры"); rst.type="button";
-  rst.onclick=()=>{state.stones.clear();state.types.clear();state.tones.clear();state.q="";$("#q").value="";syncInputs();render()};
-  rail.append(g1,g2,g3,rst);
-  rail.addEventListener("change",e=>{
-    const i=e.target; if(!i.dataset.k)return;
-    const set=state[i.dataset.k]; i.checked?set.add(i.value):set.delete(i.value); syncInputs(); render();
-  });
-
-  const chips=$("#chips"); chips.innerHTML="";
-  [...STONES.map(s=>["stones",s]),...TYPES.map(t=>["types",t]),...TONES.map(t=>["tones",t])].forEach(([k,v])=>{
-    const b=el("button","chip",k==="tones"?TONE_LABEL[v]:v); b.type="button"; b.dataset.k=k; b.dataset.v=v; b.setAttribute("aria-pressed","false");
-    b.onclick=()=>{const set=state[k]; set.has(v)?set.delete(v):set.add(v); syncInputs(); render()};
-    chips.append(b);
-  });
-}
-function syncInputs(){
-  document.querySelectorAll('#rail input[type=checkbox]').forEach(i=>i.checked=state[i.dataset.k].has(i.value));
-  document.querySelectorAll('.chip').forEach(b=>b.setAttribute("aria-pressed",state[b.dataset.k].has(b.dataset.v)?"true":"false"));
-}
-
-/* ── Сетка ──────────────────────────────────────────────── */
-function visible(){
-  const q=state.q.trim().toLowerCase();
-  let r=CATALOG.filter(c=>{
-    if(state.stones.size && !state.stones.has(c.stone))return false;
-    if(state.types.size && !c.types.some(t=>state.types.has(t)))return false;
-    if(state.tones.size && !state.tones.has(toneOf(c)))return false;
-    if(q){
-      const hay=[c.id,c.name,c.line,c.stone,c.metal,c.desc,...c.pieces.map(p=>p.art+" "+p.n+" "+p.spec)].join(" ").toLowerCase();
-      if(!hay.includes(q))return false;
-    }
-    return true;
-  });
-  if(state.sort==="name")r.sort((a,b)=>a.name.localeCompare(b.name,"ru"));
-  if(state.sort==="stone")r.sort((a,b)=>a.stone.localeCompare(b.stone,"ru")||a.name.localeCompare(b.name,"ru"));
-  if(state.sort==="pcs")r.sort((a,b)=>b.pieces.length-a.pieces.length||a.name.localeCompare(b.name,"ru"));
-  return r;
-}
-const plural=(n,a,b,c)=>{const m=n%100; if(m>=11&&m<=14)return c; const k=n%10; return k===1?a:(k>=2&&k<=4?b:c)};
-
-function render(){
-  const list=visible(), grid=$("#grid"); grid.innerHTML="";
-  $("#res").textContent=`${list.length} ${plural(list.length,"линия","линии","линий")} · ${list.reduce((a,c)=>a+c.pieces.length,0)} ${plural(list.reduce((a,c)=>a+c.pieces.length,0),"изделие","изделия","изделий")}`;
-  $("#empty").hidden=list.length>0;
-  list.forEach(c=>{
-    const card=el("button","card");
-    card.type="button";
-    card.innerHTML=`
-      <div class="ph">
-        <img src="img/${c.slug}-card.webp" alt="Комплект «${c.name}»" loading="lazy" width="900" height="900">
-        <span class="sku">${c.id}</span>
-        <button class="fav" type="button" aria-pressed="${state.sel.has(c.id)}" aria-label="В подборку" title="Добавить в подборку">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 5v14M5 12h14"/></svg>
-        </button>
-      </div>
-      <div class="body">
-        <span class="stone"><span class="swatch" style="background:${c.color}"></span>${c.stone}</span>
-        <h3>${c.name}</h3>
-        <div class="line">${c.line}</div>
-        <div class="meta"><span class="tone"><span class="swatch" style="background:${TONE_DOT[toneOf(c)]}"></span>${TONE_LABEL[toneOf(c)]}</span><span class="pcs">${c.pieces.length} ${plural(c.pieces.length,"предмет","предмета","предметов")}</span></div>
-      </div>`;
-    card.onclick=e=>{ if(e.target.closest(".fav")){toggle(c.id);return} openSheet(c.id) };
-    grid.append(card);
-  });
-  $("#selCount").textContent=state.sel.size;
-}
-function toggle(id){ state.sel.has(id)?state.sel.delete(id):state.sel.add(id); save(); render(); if($("#drawer"))drawSel(); toast(state.sel.has(id)?"Добавлено в подборку":"Убрано из подборки"); }
-
-/* ── Карточка изделия ───────────────────────────────────── */
-let sheetEl=null, lastFocus=null;
-function openSheet(id){
-  const c=CATALOG.find(x=>x.id===id); lastFocus=document.activeElement;
-  closeSheet();
-  const rows=c.pieces.map(p=>`<tr><td><b style="font-family:var(--f-display);font-weight:400">${p.n}</b><br><span style="color:var(--muted);font-size:13px">${p.spec}</span></td><td class="num">${p.art}</td><td class="num">${p.size}</td><td class="num">${p.w}</td></tr>`).join("");
-  sheetEl=el("div","sheet");
-  sheetEl.innerHTML=`
-    <div class="sheet-in" role="dialog" aria-modal="true" aria-label="Комплект ${c.name}">
-      <div class="sheet-bar">
-        <span class="eyebrow">${c.id} · Комплект «${c.name}»</span>
-        <button class="iconbtn" type="button" id="xBtn" aria-label="Закрыть карточку">Закрыть ✕</button>
-      </div>
-      <img class="look" id="lookImg" src="img/${c.slug}-look.webp" alt="Съёмка комплекта «${c.name}»">
-      <div class="lookhint"><span>Съёмка со всех ракурсов</span><button type="button" id="lookBtn">Показать кадр целиком</button></div>
-      <div class="sheet-body">
-        <div>
-          <p class="eyebrow">${c.stone} · ${c.metal}</p>
-          <h2>${c.name}</h2>
-          <p class="desc">${c.desc}</p>
-          <div class="tscroll">
-            <table class="spec">
-              <thead><tr><th>Изделие</th><th class="num">Артикул</th><th class="num">Размер</th><th class="num">Вес</th></tr></thead>
-              <tbody>${rows}</tbody>
-            </table>
-          </div>
-          <p class="note">Уход: ${c.care}</p>
-        </div>
-        <aside class="panel">
-          <p class="eyebrow">Спецификация</p>
-          <dl class="kv">
-            <dt>Металл</dt><dd>${c.metal}</dd>
-            <dt>Вставка</dt><dd>${c.stone}</dd>
-            <dt>Закрепка</dt><dd>ручная</dd>
-            <dt>Состав</dt><dd>${c.pieces.length} ${plural(c.pieces.length,"предмет","предмета","предметов")}</dd>
-            <dt>Срок</dt><dd>10–18 раб. дней</dd>
-            <dt>Клеймо</dt><dd>585° + именник</dd>
-          </dl>
-          <div class="total"><span>Стоимость</span><b style="font-size:17px">по запросу</b></div>
-          <button class="cta" type="button" id="addBtn">${state.sel.has(c.id)?"Убрать из подборки":"Добавить в подборку"}</button>
-          <button class="cta ghost" type="button" id="copyBtn">Скопировать спецификацию</button>
-          <p class="note">Размер кольца и длина цепи уточняются на примерке.</p>
-        </aside>
-      </div>
-    </div>`;
-  document.body.append(sheetEl);
-  document.body.style.overflow="hidden";
-  sheetEl.addEventListener("click",e=>{ if(e.target===sheetEl)closeSheet() });
-  sheetEl.querySelector("#xBtn").onclick=closeSheet;
-  const look=sheetEl.querySelector("#lookImg"), lookBtn=sheetEl.querySelector("#lookBtn");
-  const toggleLook=()=>{
-    const full=look.classList.toggle("full");
-    lookBtn.textContent=full?"Свернуть кадр":"Показать кадр целиком";
-    if(!full)sheetEl.querySelector(".sheet-in").scrollTop=0;
-  };
-  look.onclick=toggleLook; lookBtn.onclick=toggleLook;
-  sheetEl.querySelector("#addBtn").onclick=e=>{toggle(c.id); e.target.textContent=state.sel.has(c.id)?"Убрать из подборки":"Добавить в подборку"};
-  sheetEl.querySelector("#copyBtn").onclick=()=>copy(specText(c));
-  sheetEl.querySelector("#xBtn").focus();
-}
-function closeSheet(){ if(sheetEl){sheetEl.remove();sheetEl=null;document.body.style.overflow="";lastFocus&&lastFocus.focus&&lastFocus.focus()} }
-const specText=c=>`${c.id} «${c.name}» — ${c.metal}, вставка: ${c.stone}\n`+
-  c.pieces.map(p=>`• ${p.art} ${p.n}: ${p.spec}; размер ${p.size}; вес ${p.w}`).join("\n");
-
-/* ── Подборка ───────────────────────────────────────────── */
-let drawer=null;
-function openDrawer(){
-  if(drawer)return closeDrawer();
-  drawer=el("div","drawer"); drawer.id="drawer";
-  drawer.innerHTML=`<header><h3>Подборка</h3><button class="iconbtn" type="button" id="dx" aria-label="Закрыть">✕</button></header>
-    <div class="list" id="dlist"></div>
-    <footer>
-      <div class="total" style="margin:0;padding:0;border:none"><span>В подборке</span><b id="dtotal" style="font-size:17px">—</b></div>
-      <button class="cta" type="button" id="dcopy">Скопировать заявку</button>
-    </footer>`;
-  document.body.append(drawer);
-  drawer.querySelector("#dx").onclick=closeDrawer;
-  drawer.querySelector("#dcopy").onclick=()=>{
-    const items=CATALOG.filter(c=>state.sel.has(c.id));
-    if(!items.length)return toast("Подборка пуста");
-    copy("Заявка на просчёт — The Goldsmith\n\n"+items.map(specText).join("\n\n")+
-      "\n\nПрошу рассчитать стоимость по перечисленным артикулам.");
-  };
-  drawSel();
-}
-function closeDrawer(){ if(drawer){drawer.remove();drawer=null} }
-function drawSel(){
-  if(!drawer)return;
-  const items=CATALOG.filter(c=>state.sel.has(c.id)), box=drawer.querySelector("#dlist");
-  box.innerHTML="";
-  if(!items.length) box.append(el("div","empty","Пока пусто. Нажмите «+» на карточке, чтобы собрать подборку для заказа."));
-  items.forEach(c=>{
-    const r=el("div","drow",`<img src="img/${c.slug}-card.webp" alt=""><div class="t"><b>${c.name}</b><span>${c.id} · ${c.stone}</span></div><span class="p">${c.pieces.length} ${plural(c.pieces.length,"предмет","предмета","предметов")}</span><button type="button" aria-label="Убрать">✕</button>`);
-    r.querySelector("button").onclick=()=>toggle(c.id);
-    box.append(r);
-  });
-  const total=items.reduce((a,c)=>a+c.pieces.length,0);
-  drawer.querySelector("#dtotal").textContent=items.length?`${items.length} ${plural(items.length,"линия","линии","линий")} · ${total} ${plural(total,"изделие","изделия","изделий")}`:"—";
-}
-
-/* ── Мелочи ─────────────────────────────────────────────── */
-let tEl=null;
-function toast(msg){ if(tEl)tEl.remove(); tEl=el("div","toast",msg); document.body.append(tEl); setTimeout(()=>{tEl&&tEl.remove();tEl=null},2200) }
-function copy(text){
-  if(navigator.clipboard&&navigator.clipboard.writeText){
-    navigator.clipboard.writeText(text).then(()=>toast("Скопировано в буфер"),()=>fallback(text));
-  } else fallback(text);
-}
-function fallback(text){
-  const ta=el("textarea"); ta.value=text; ta.style.cssText="position:fixed;opacity:0"; document.body.append(ta); ta.select();
-  toast("Текст выделен — скопируйте вручную"); setTimeout(()=>ta.remove(),6000);
-}
-$("#q").addEventListener("input",e=>{state.q=e.target.value;render()});
-$("#sort").addEventListener("change",e=>{state.sort=e.target.value;render()});
-$("#selBtn").addEventListener("click",openDrawer);
-$("#themeBtn").addEventListener("click",()=>{
-  const r=document.documentElement;
-  const dark=r.getAttribute("data-theme")==="dark" || (!r.getAttribute("data-theme") && matchMedia("(prefers-color-scheme:dark)").matches);
-  r.setAttribute("data-theme",dark?"light":"dark");
+  const d=document.createElement("button");
+  d.type="button";
+  d.setAttribute("aria-label",`Кадр ${i+1} из ${SHOTS.length}`);
+  d.setAttribute("aria-current",i===0?"true":"false");
+  d.addEventListener("click",()=>go(i));
+  dots.append(d);
 });
-document.addEventListener("keydown",e=>{ if(e.key==="Escape"){ if(sheetEl)closeSheet(); else closeDrawer() } });
 
-buildRail(); syncInputs(); render();
+const slides=[...rail.children];
+const buttons=[...dots.children];
+
+function go(i){
+  index=Math.max(0,Math.min(SHOTS.length-1,i));
+  rail.scrollTo({left:slides[index].offsetLeft,behavior:"smooth"});
+  mark();
+}
+function mark(){
+  buttons.forEach((b,i)=>b.setAttribute("aria-current",i===index?"true":"false"));
+}
+
+/* Какой кадр по центру — считаем от прокрутки, чтобы свайп тоже двигал точки */
+let raf=null;
+rail.addEventListener("scroll",()=>{
+  if(raf)return;
+  raf=requestAnimationFrame(()=>{
+    raf=null;
+    const i=Math.round(rail.scrollLeft/rail.clientWidth);
+    if(i!==index && i>=0 && i<SHOTS.length){
+      index=i;
+      slides.forEach(s=>s.querySelector("img").classList.remove("zoom"));
+      mark();
+    }
+  });
+});
+
+document.getElementById("prev").addEventListener("click",()=>go(index-1));
+document.getElementById("next").addEventListener("click",()=>go(index+1));
+document.addEventListener("keydown",e=>{
+  if(e.key==="ArrowRight"||e.key==="PageDown"){go(index+1);e.preventDefault()}
+  if(e.key==="ArrowLeft"||e.key==="PageUp"){go(index-1);e.preventDefault()}
+  if(e.key==="Home"){go(0);e.preventDefault()}
+  if(e.key==="End"){go(SHOTS.length-1);e.preventDefault()}
+});
+
+/* Колесо мыши листает по горизонтали */
+rail.addEventListener("wheel",e=>{
+  if(Math.abs(e.deltaY)<=Math.abs(e.deltaX))return;
+  e.preventDefault();
+  go(index+(e.deltaY>0?1:-1));
+},{passive:false});
 </script>
