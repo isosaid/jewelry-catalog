@@ -142,69 +142,33 @@ SHOTS.forEach((slug,i)=>{
 const slides=[...rail.children];
 const buttons=[...dots.children];
 
-/* Кадры, добавленные на сайте на этом устройстве — хранилище общее */
-const DB="goldsmith", STORE="shots";
-function open_db(){
-  return new Promise((res,rej)=>{
-    const r=indexedDB.open(DB,1);
-    r.onupgradeneeded=()=>{const d=r.result; if(!d.objectStoreNames.contains(STORE))d.createObjectStore(STORE,{keyPath:"id"})};
-    r.onsuccess=()=>res(r.result);
-    r.onerror=()=>rej(r.error);
-  });
-}
+/* Кадры из общего хранилища — те же, что видны на сайте */
 (async()=>{
-  let recs=[];
+  let shots=[];
   try{
-    const d=await open_db();
-    recs=await new Promise((res,rej)=>{
-      const q=d.transaction(STORE).objectStore(STORE).getAll();
-      q.onsuccess=()=>res(q.result||[]); q.onerror=()=>rej(q.error);
-    });
+    const r=await fetch("api/shots",{cache:"no-store"});
+    if(!r.ok)return;
+    shots=(await r.json()).shots||[];
   }catch(e){return}
-  recs.forEach((r,n)=>{
+  shots.forEach((sh,n)=>{
     const cell=document.createElement("div");
     cell.className="slide";
     const img=document.createElement("img");
-    img.src=URL.createObjectURL(r.blob); img.alt=""; img.loading="lazy"; img.decoding="async";
+    img.src=sh.url; img.alt=""; img.loading="lazy"; img.decoding="async";
     img.addEventListener("click",()=>img.classList.toggle("zoom"));
     cell.append(img);
     rail.append(cell);
     slides.push(cell);
 
-    const d2=document.createElement("button");
-    d2.type="button";
-    d2.setAttribute("aria-label",`Кадр ${SHOTS.length+n+1}`);
-    d2.setAttribute("aria-current","false");
-    d2.addEventListener("click",()=>go(SHOTS.length+n));
-    dots.append(d2);
-    buttons.push(d2);
+    const d=document.createElement("button");
+    d.type="button";
+    d.setAttribute("aria-label",`Кадр ${SHOTS.length+n+1}`);
+    d.setAttribute("aria-current","false");
+    d.addEventListener("click",()=>go(SHOTS.length+n));
+    dots.append(d);
+    buttons.push(d);
   });
 })();
-
-
-function go(i){
-  index=Math.max(0,Math.min(slides.length-1,i));
-  rail.scrollTo({left:slides[index].offsetLeft,behavior:"smooth"});
-  mark();
-}
-function mark(){
-  buttons.forEach((b,i)=>b.setAttribute("aria-current",i===index?"true":"false"));
-}
-
-/* Какой кадр по центру — считаем от прокрутки, чтобы свайп тоже двигал точки */
-let raf=null;
-rail.addEventListener("scroll",()=>{
-  if(raf)return;
-  raf=requestAnimationFrame(()=>{
-    raf=null;
-    const i=Math.round(rail.scrollLeft/rail.clientWidth);
-    if(i!==index && i>=0 && i<slides.length){
-      index=i;
-      slides.forEach(s=>s.querySelector("img").classList.remove("zoom"));
-      mark();
-    }
-  });
-});
 
 document.getElementById("prev").addEventListener("click",()=>go(index-1));
 document.getElementById("next").addEventListener("click",()=>go(index+1));
