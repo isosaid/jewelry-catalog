@@ -4,31 +4,28 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Marcellus&family=Jost:wght@300;400;500&display=swap">
 <style>
-/* Макет: тёмная обложка со съёмкой → лента кадров во всю ширину → светлые разделы о работе → контакты */
+/* Макет: тёмная обложка со съёмкой на всю ширину → лента кадров с привязкой прокрутки */
 :root{
-  --bg:#EFEDEA; --surface:#FFFFFF; --surface-2:#F6F4F1;
-  --ink:#17171A; --muted:#6C6C75; --line:#DCD9D4;
+  --bg:#EFEDEA; --ink:#17171A; --muted:#6C6C75;
   --gold:#8A6B2C; --gold-soft:#C9A961;
   --dark:#0D0D10; --dark-ink:#ECECEF; --dark-muted:#9B9BA4; --dark-line:#272730;
-  --veil:rgba(239,237,234,.70); --panel:rgba(255,255,255,.78); --photo:none;
+  --veil:rgba(239,237,234,.70); --photo:none;
   --shots-bg:rgba(13,13,16,.74);
   --f-display:"Marcellus","Hoefler Text",Georgia,serif;
   --f-body:"Jost","Avenir Next",-apple-system,"Segoe UI",sans-serif;
   color-scheme:light;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --bg:#121215; --surface:#1A1A1E; --surface-2:#212128;
-  --ink:#ECECEF; --muted:#9B9BA6; --line:#2D2D35;
+  --bg:#121215; --ink:#ECECEF; --muted:#9B9BA6;
   --gold:#C9A24A; --gold-soft:#E0C98B;
-  --veil:rgba(14,14,18,.80); --panel:rgba(26,26,30,.76); --photo:brightness(.55) saturate(.9);
+  --veil:rgba(14,14,18,.80); --photo:brightness(.55) saturate(.9);
   --shots-bg:rgba(10,10,13,.70);
   color-scheme:dark;
 }}
 :root[data-theme="dark"]{
-  --bg:#121215; --surface:#1A1A1E; --surface-2:#212128;
-  --ink:#ECECEF; --muted:#9B9BA6; --line:#2D2D35;
+  --bg:#121215; --ink:#ECECEF; --muted:#9B9BA6;
   --gold:#C9A24A; --gold-soft:#E0C98B;
-  --veil:rgba(14,14,18,.80); --panel:rgba(26,26,30,.76); --photo:brightness(.55) saturate(.9);
+  --veil:rgba(14,14,18,.80); --photo:brightness(.55) saturate(.9);
   --shots-bg:rgba(10,10,13,.70);
   color-scheme:dark;
 }
@@ -38,7 +35,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 /* Сквозная подложка: съёмка закреплена во вьюпорте, разделы лежат на ней полупрозрачными слоями */
 .backdrop{position:fixed;inset:0;z-index:0;pointer-events:none;background:url("img/backdrop.webp") center center/cover no-repeat;filter:var(--photo)}
 .backdrop::after{content:"";position:absolute;inset:0;background:var(--veil)}
-.cover,.shots,section.band,footer.page{position:relative;z-index:1}
+.cover,.shots{position:relative;z-index:1}
 h1,h2,h3{font-family:var(--f-display);font-weight:400;text-wrap:balance;letter-spacing:.01em;margin:0}
 img{display:block}
 a{color:inherit}
@@ -94,40 +91,10 @@ nav.menu a:hover{color:var(--dark-ink);border-color:var(--gold-soft)}
 .dots button[aria-current="true"]{background:var(--gold-soft);transform:scale(1.5)}
 .hint{text-align:center;margin:12px 0 0;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--dark-muted)}
 
-/* ── Текстовые разделы ───────────────── */
-section.band{padding-block:62px}
-section.band.alt{background:var(--panel);backdrop-filter:blur(12px) saturate(1.3);-webkit-backdrop-filter:blur(12px) saturate(1.3)}
-.band h2{font-size:clamp(25px,3.6vw,34px);margin-top:8px}
-.lede{max-width:62ch;color:var(--muted);margin:16px 0 0}
-.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:30px;margin-top:38px}
-.cols h3{font-size:19px;margin-bottom:6px}
-.cols p{margin:0;color:var(--muted);font-size:15px}
-.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:1px;margin-top:38px;background:var(--line);border:1px solid var(--line)}
-.step{background:var(--panel);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);padding:24px 20px}
-.step b{display:block;font-family:var(--f-display);font-size:30px;color:var(--gold);line-height:1;margin-bottom:12px}
-.step h3{font-size:17px;margin-bottom:5px}
-.step p{margin:0;color:var(--muted);font-size:14px}
-.facts-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:24px;margin-top:38px;border-top:1px solid var(--line);padding-top:26px}
-.facts-row div b{display:block;font-family:var(--f-display);font-size:24px;line-height:1.1}
-.facts-row div span{font-size:13px;color:var(--muted)}
-
-/* ── Контакты ────────────────────────── */
-.contact{display:grid;grid-template-columns:1.05fr .95fr;gap:36px;margin-top:34px;align-items:start}
-.card{background:var(--panel);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid var(--line);padding:26px;border-radius:2px}
-dl.kv{display:grid;grid-template-columns:auto 1fr;gap:12px 20px;margin:0}
-dl.kv dt{color:var(--muted);font-size:14px}
-dl.kv dd{margin:0;text-align:right}
-.fill{color:var(--gold);border-bottom:1px dashed currentColor}
-footer.page{border-top:1px solid var(--line);background:var(--panel);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
-.foot-in{display:flex;flex-wrap:wrap;gap:12px 28px;align-items:center;padding-block:24px;font-size:13px;color:var(--muted)}
-.foot-in .mark{font-size:15px;color:var(--ink);margin-right:auto}
-
 @media (max-width:820px){
   nav.menu{display:none}
   .cover-in{padding-block:52px 46px}
   .cover::after{background:linear-gradient(170deg,rgba(13,13,16,.92) 0%,rgba(13,13,16,.86) 62%,rgba(13,13,16,.5) 100%)}
-  .contact{grid-template-columns:1fr}
-  section.band{padding-block:46px}
 }
 @media (prefers-reduced-motion:reduce){.rail{scroll-behavior:auto}*{transition:none!important}}
 </style>
@@ -139,9 +106,7 @@ footer.page{border-top:1px solid var(--line);background:var(--panel);backdrop-fi
     <a class="mark" href="#top">The Goldsmith</a>
     <nav class="menu">
       <a href="#shots">Съёмки</a>
-      <a href="#atelier">Ателье</a>
-      <a href="#order">Как заказать</a>
-      <a href="#contact">Контакты</a>
+      <a href="gallery.html">Во весь экран</a>
     </nav>
     <button class="themebtn" id="themeBtn" type="button" aria-label="Переключить тему">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg>
@@ -153,7 +118,7 @@ footer.page{border-top:1px solid var(--line);background:var(--panel);backdrop-fi
   <div class="wrap cover-in">
     <p class="eyebrow" style="color:var(--dark-muted)">Золото 585° · ручная закрепка</p>
     <h1>Украшения, собранные комплектами</h1>
-    <p class="lead">Серьги, кольца, колье и подвески одной линии делаются вместе: камни подбираются партией по цвету и калибру, оправы закрепляются руками. Изготовление под заказ — от десяти рабочих дней.</p>
+    <p class="lead">Серьги, кольца, колье и подвески одной линии делаются вместе: камни подбираются партией по цвету и калибру, оправы закрепляются руками.</p>
     <div class="actions">
       <a class="btn" href="#shots">Смотреть съёмки</a>
       <a class="btn ghost" href="gallery.html">Во весь экран</a>
@@ -190,82 +155,6 @@ footer.page{border-top:1px solid var(--line);background:var(--panel);backdrop-fi
   </div>
 </section>
 
-<section class="band" id="atelier">
-  <div class="wrap">
-    <p class="eyebrow">Ателье</p>
-    <h2>Что стоит за каждым комплектом</h2>
-    <p class="lede">Вещи делаются небольшими партиями, поэтому камень в вашем изделии подбирается отдельно, а не берётся из общего потока. Размер кольца и длина цепи снимаются на примерке.</p>
-    <div class="cols">
-      <div>
-        <h3>Подбор камня</h3>
-        <p>Вставки отбираются партиями по цвету и калибру: в комплекте камни совпадают по тону, а не просто относятся к одной породе.</p>
-      </div>
-      <div>
-        <h3>Ручная закрепка</h3>
-        <p>Крапаны, глухие касты и паве сажаются вручную. Ажурные галереи прорабатываются с изнанки — вещь смотрится и со спины.</p>
-      </div>
-      <div>
-        <h3>Три оттенка золота</h3>
-        <p>Жёлтое, розовое и белое, проба 585. Любую линию можно повторить в другом оттенке — артикул получает индекс W, R или Y.</p>
-      </div>
-      <div>
-        <h3>Обслуживание</h3>
-        <p>Чистка и полировка бесплатно. Родиевое покрытие белого золота обновляется раз в два-три года, гарантия на закрепку — 24 месяца.</p>
-      </div>
-    </div>
-    <div class="facts-row">
-      <div><b>10–18</b><span>рабочих дней на изготовление</span></div>
-      <div><b>585°</b><span>проба с именником</span></div>
-      <div><b>24</b><span>месяца гарантии на закрепку</span></div>
-      <div><b>16–20</b><span>размерный ряд колец</span></div>
-    </div>
-  </div>
-</section>
-
-<section class="band alt" id="order">
-  <div class="wrap">
-    <p class="eyebrow">Как заказать</p>
-    <h2>Четыре шага от съёмки до выдачи</h2>
-    <div class="steps">
-      <div class="step"><b>1</b><h3>Выбор линии</h3><p>Отметьте понравившиеся кадры и напишите нам — расскажем, из чего собран комплект и что можно изменить.</p></div>
-      <div class="step"><b>2</b><h3>Примерка</h3><p>На встрече снимаем размер пальца и длину цепи, показываем варианты оттенка золота и посадку камня.</p></div>
-      <div class="step"><b>3</b><h3>Подбор камня и расчёт</h3><p>Под выбранный калибр подбираем вставки и называем стоимость. После согласования работа уходит в производство.</p></div>
-      <div class="step"><b>4</b><h3>Изготовление</h3><p>От десяти до восемнадцати рабочих дней. Готовое изделие показываем перед финальной полировкой.</p></div>
-    </div>
-  </div>
-</section>
-
-<section class="band" id="contact">
-  <div class="wrap">
-    <p class="eyebrow">Контакты</p>
-    <h2>Примерка по записи</h2>
-    <div class="contact">
-      <div class="card">
-        <dl class="kv">
-          <dt>Город</dt><dd>Худжанд</dd>
-          <dt>Приём</dt><dd>Пн–Сб, 10:00–19:00</dd>
-          <dt>Телефон</dt><dd><span class="fill">укажите номер</span></dd>
-          <dt>Telegram</dt><dd><span class="fill">укажите ник</span></dd>
-          <dt>Instagram</dt><dd><span class="fill">укажите профиль</span></dd>
-        </dl>
-      </div>
-      <div>
-        <p class="lede" style="margin-top:0">Встречи проходят по предварительной договорённости: так камни и образцы оттенков будут готовы к вашему приходу. Напишите, какие кадры вам понравились, — к встрече подготовим именно эти линии.</p>
-        <div class="actions" style="margin-top:22px">
-          <a class="btn" href="#shots">Вернуться к съёмкам</a>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<footer class="page">
-  <div class="wrap foot-in">
-    <span class="mark">The Goldsmith</span>
-    <span>Золото 585° · Худжанд</span>
-    <span>Изделия изготавливаются под заказ</span>
-  </div>
-</footer>
 
 <script>
 /* Порядок кадров: имена файлов в img/ */
