@@ -262,8 +262,9 @@ async function load(){
     uploaded=j.shots||[];
   }catch(e){
     serverReady=false; uploaded=[];
-    addBtn.hidden=true;        /* без сервера кнопке нечего делать */
   }
+  /* кнопка нужна только когда хранилище реально отвечает */
+  addBtn.hidden=!serverReady;
   build(); idle();
 }
 
