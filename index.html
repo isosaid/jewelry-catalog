@@ -10,6 +10,8 @@
   --ink:#17171A; --muted:#6C6C75; --line:#DCD9D4;
   --gold:#8A6B2C; --gold-soft:#C9A961;
   --dark:#0D0D10; --dark-ink:#ECECEF; --dark-muted:#9B9BA4; --dark-line:#272730;
+  --veil:rgba(239,237,234,.70); --panel:rgba(255,255,255,.78); --photo:none;
+  --shots-bg:rgba(13,13,16,.74);
   --f-display:"Marcellus","Hoefler Text",Georgia,serif;
   --f-body:"Jost","Avenir Next",-apple-system,"Segoe UI",sans-serif;
   color-scheme:light;
@@ -18,17 +20,25 @@
   --bg:#121215; --surface:#1A1A1E; --surface-2:#212128;
   --ink:#ECECEF; --muted:#9B9BA6; --line:#2D2D35;
   --gold:#C9A24A; --gold-soft:#E0C98B;
+  --veil:rgba(14,14,18,.80); --panel:rgba(26,26,30,.76); --photo:brightness(.55) saturate(.9);
+  --shots-bg:rgba(10,10,13,.70);
   color-scheme:dark;
 }}
 :root[data-theme="dark"]{
   --bg:#121215; --surface:#1A1A1E; --surface-2:#212128;
   --ink:#ECECEF; --muted:#9B9BA6; --line:#2D2D35;
   --gold:#C9A24A; --gold-soft:#E0C98B;
+  --veil:rgba(14,14,18,.80); --panel:rgba(26,26,30,.76); --photo:brightness(.55) saturate(.9);
+  --shots-bg:rgba(10,10,13,.70);
   color-scheme:dark;
 }
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:40;background:var(--dark)}
+/* Сквозная подложка: съёмка закреплена во вьюпорте, разделы лежат на ней полупрозрачными слоями */
+.backdrop{position:fixed;inset:0;z-index:0;pointer-events:none;background:url("img/backdrop.webp") center center/cover no-repeat;filter:var(--photo)}
+.backdrop::after{content:"";position:absolute;inset:0;background:var(--veil)}
+.cover,.shots,section.band,footer.page{position:relative;z-index:1}
 h1,h2,h3{font-family:var(--f-display);font-weight:400;text-wrap:balance;letter-spacing:.01em;margin:0}
 img{display:block}
 a{color:inherit}
@@ -49,8 +59,8 @@ nav.menu a:hover{color:var(--dark-ink);border-color:var(--gold-soft)}
 
 /* ── Обложка ─────────────────────────── */
 .cover{position:relative;background:var(--dark);color:var(--dark-ink);overflow:hidden;isolation:isolate}
-.cover::before{content:"";position:absolute;inset:0;z-index:-2;background:url("img/backdrop.webp") center right/cover no-repeat;filter:brightness(.62) saturate(.95)}
-.cover::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(98deg,rgba(13,13,16,.92) 0%,rgba(13,13,16,.82) 38%,rgba(13,13,16,.18) 82%)}
+.cover::before{content:"";position:absolute;inset:0;z-index:-2;background:url("img/backdrop.webp") center right/cover no-repeat;filter:brightness(.8) saturate(1)}
+.cover::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(98deg,rgba(13,13,16,.88) 0%,rgba(13,13,16,.62) 34%,rgba(13,13,16,0) 76%)}
 .cover-in{display:grid;gap:26px;padding-block:72px 64px;max-width:640px}
 .cover h1{font-size:clamp(34px,6vw,58px);line-height:1.08}
 .cover p.lead{color:var(--dark-muted);margin:0;max-width:52ch}
@@ -64,7 +74,7 @@ nav.menu a:hover{color:var(--dark-ink);border-color:var(--gold-soft)}
 .cover-facts div span{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--dark-muted)}
 
 /* ── Лента кадров ────────────────────── */
-.shots{background:var(--dark);color:var(--dark-ink);padding-block:34px 42px;border-top:1px solid var(--dark-line)}
+.shots{background:var(--shots-bg);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:var(--dark-ink);padding-block:34px 42px;border-top:1px solid var(--dark-line)}
 .shots-head{display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:20px}
 .shots-head h2{font-size:clamp(23px,3.4vw,31px);margin-right:auto}
 .shots-head .eyebrow{color:var(--dark-muted)}
@@ -86,14 +96,14 @@ nav.menu a:hover{color:var(--dark-ink);border-color:var(--gold-soft)}
 
 /* ── Текстовые разделы ───────────────── */
 section.band{padding-block:62px}
-section.band.alt{background:var(--surface)}
+section.band.alt{background:var(--panel);backdrop-filter:blur(12px) saturate(1.3);-webkit-backdrop-filter:blur(12px) saturate(1.3)}
 .band h2{font-size:clamp(25px,3.6vw,34px);margin-top:8px}
 .lede{max-width:62ch;color:var(--muted);margin:16px 0 0}
 .cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:30px;margin-top:38px}
 .cols h3{font-size:19px;margin-bottom:6px}
 .cols p{margin:0;color:var(--muted);font-size:15px}
 .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:1px;margin-top:38px;background:var(--line);border:1px solid var(--line)}
-.step{background:var(--surface);padding:24px 20px}
+.step{background:var(--panel);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);padding:24px 20px}
 .step b{display:block;font-family:var(--f-display);font-size:30px;color:var(--gold);line-height:1;margin-bottom:12px}
 .step h3{font-size:17px;margin-bottom:5px}
 .step p{margin:0;color:var(--muted);font-size:14px}
@@ -103,12 +113,12 @@ section.band.alt{background:var(--surface)}
 
 /* ── Контакты ────────────────────────── */
 .contact{display:grid;grid-template-columns:1.05fr .95fr;gap:36px;margin-top:34px;align-items:start}
-.card{background:var(--surface);border:1px solid var(--line);padding:26px;border-radius:2px}
+.card{background:var(--panel);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid var(--line);padding:26px;border-radius:2px}
 dl.kv{display:grid;grid-template-columns:auto 1fr;gap:12px 20px;margin:0}
 dl.kv dt{color:var(--muted);font-size:14px}
 dl.kv dd{margin:0;text-align:right}
 .fill{color:var(--gold);border-bottom:1px dashed currentColor}
-footer.page{border-top:1px solid var(--line);background:var(--surface-2)}
+footer.page{border-top:1px solid var(--line);background:var(--panel);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
 .foot-in{display:flex;flex-wrap:wrap;gap:12px 28px;align-items:center;padding-block:24px;font-size:13px;color:var(--muted)}
 .foot-in .mark{font-size:15px;color:var(--ink);margin-right:auto}
 
@@ -121,6 +131,8 @@ footer.page{border-top:1px solid var(--line);background:var(--surface-2)}
 }
 @media (prefers-reduced-motion:reduce){.rail{scroll-behavior:auto}*{transition:none!important}}
 </style>
+
+<div class="backdrop" aria-hidden="true"></div>
 
 <header class="top">
   <div class="wrap top-in">
