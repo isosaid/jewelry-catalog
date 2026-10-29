@@ -8,6 +8,11 @@ export default async function handler(req, res) {
     return;
   }
 
+  if (!process.env.BLOB_READ_WRITE_TOKEN) {
+    res.status(503).json({ error: "Blob-хранилище не подключено к проекту в Vercel" });
+    return;
+  }
+
   const { type, data } = req.body || {};
   if (!data) {
     res.status(400).json({ error: "Файл не передан" });
@@ -31,6 +36,6 @@ export default async function handler(req, res) {
     });
     res.status(200).json({ url: blob.url });
   } catch (e) {
-    res.status(500).json({ error: "Хранилище не отвечает" });
+    res.status(500).json({ error: "Хранилище не приняло кадр: " + String(e && e.message || e) });
   }
 }

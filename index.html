@@ -83,6 +83,7 @@ nav.menu a:hover{color:var(--dark-ink);border-color:var(--gold-soft)}
 .del{width:30px;height:30px;border:none;border-radius:50%;background:rgba(10,10,13,.7);color:var(--dark-ink);display:grid;place-items:center;cursor:pointer;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
 .del:hover{background:#8C2230;color:#fff}
 .addbtn:disabled{opacity:.5;cursor:default}
+.note{margin:0 0 18px;padding:12px 15px;border:1px solid var(--dark-line);border-left:3px solid var(--gold-soft);border-radius:2px;background:rgba(236,236,239,.06);color:var(--dark-muted);font-size:14px}
 .stage{position:relative}
 .rail{display:flex;gap:0;height:clamp(340px,64vh,680px);overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;overscroll-behavior-x:contain}
 .rail::-webkit-scrollbar{display:none}
@@ -130,9 +131,9 @@ nav.menu a:hover{color:var(--dark-ink);border-color:var(--gold-soft)}
       <a class="btn big" href="gallery.html">Во весь экран</a>
     </div>
     <div class="cover-facts">
-      <div><b>13</b><span>линий</span></div>
-      <div><b>27</b><span>изделий</span></div>
-      <div><b>11</b><span>камней</span></div>
+      <div><b>16</b><span>линий</span></div>
+      <div><b>33</b><span>изделия</span></div>
+      <div><b>14</b><span>камней</span></div>
       <div><b>3</b><span>оттенка золота</span></div>
     </div>
   </div>
@@ -152,6 +153,7 @@ nav.menu a:hover{color:var(--dark-ink);border-color:var(--gold-soft)}
       <a href="gallery.html">Открыть во весь экран</a>
     </div>
     <input type="file" id="addInput" accept="image/*" multiple hidden>
+    <p class="note" id="note" hidden></p>
     <div class="stage">
       <div class="rail" id="rail" tabindex="0" aria-label="Съёмки изделий"></div>
       <button class="nav prev" id="prev" type="button" aria-label="Предыдущий кадр">
@@ -171,13 +173,15 @@ nav.menu a:hover{color:var(--dark-ink);border-color:var(--gold-soft)}
 /* Встроенные кадры: имена файлов в img/ */
 const SHOTS = [
   "noir","smaragd","aquavela","rubis","amethyste","eclat","soleil",
-  "rubelle","violetta","olivine","malachite","azur","lazuli"
+  "rubelle","violetta","olivine","malachite","azur","lazuli",
+  "safir","turmalin","topaz"
 ];
 
 const rail=document.getElementById("rail");
 const dots=document.getElementById("dots");
 const hint=document.getElementById("hint");
 const addBtn=document.getElementById("addBtn");
+const note=document.getElementById("note");
 const input=document.getElementById("addInput");
 
 let index=0;
@@ -238,19 +242,25 @@ function idle(){
 
 /* ── Хранилище на сервере ── */
 async function load(){
+  let why="";
   try{
     const r=await fetch("api/shots",{cache:"no-store"});
     if(!r.ok)throw new Error("код "+r.status);
     const j=await r.json();
     serverReady=!!j.ready;
     uploaded=j.shots||[];
-    if(!serverReady)console.warn("Хранилище не подключено:",j.error);
+    if(!serverReady){
+      why=j.detail||"хранилище не отвечает";
+      console.warn("Хранилище не готово:",j.reason,j.detail);
+    }
   }catch(e){
-    console.warn("api/shots недоступен:",e.message||e);
     serverReady=false; uploaded=[];
+    why="страница открыта без серверной части — загрузка работает только на Vercel";
+    console.warn("api/shots недоступен:",e.message||e);
   }
-  /* кнопка нужна только когда хранилище реально отвечает */
   addBtn.hidden=!serverReady;
+  note.hidden=serverReady;
+  if(!serverReady)note.textContent="Загрузка кадров недоступна: "+why;
   build(); idle();
 }
 
