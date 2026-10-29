@@ -52,7 +52,7 @@ Vercel → проект → **Storage** → Create Database → **Blob** → п�
 
 ```
 api/shots.js    GET  — список кадров
-api/upload.js   POST — приём кадра, заголовок x-upload-key
+api/upload.js   POST — приём кадра
 api/delete.js   POST — удаление кадра по url
 ```
 
