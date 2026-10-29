@@ -240,11 +240,13 @@ function idle(){
 async function load(){
   try{
     const r=await fetch("api/shots",{cache:"no-store"});
-    if(!r.ok)throw 0;
+    if(!r.ok)throw new Error("код "+r.status);
     const j=await r.json();
     serverReady=!!j.ready;
     uploaded=j.shots||[];
+    if(!serverReady)console.warn("Хранилище не подключено:",j.error);
   }catch(e){
+    console.warn("api/shots недоступен:",e.message||e);
     serverReady=false; uploaded=[];
   }
   /* кнопка нужна только когда хранилище реально отвечает */
@@ -291,14 +293,25 @@ input.addEventListener("change",async()=>{
         body:JSON.stringify({type:small.type||"image/webp",data:await toBase64(small)})
       });
       const j=await r.json().catch(()=>({}));
-      if(!r.ok){ say(j.error||"Не удалось загрузить кадр"); break }
+      if(!r.ok){
+        console.error("upload",r.status,j);
+        say(`${j.error||"Не удалось загрузить кадр"} (код ${r.status})`);
+        break;
+      }
       uploaded.push({url:j.url});
       done++;
       build();
-    }catch(e){ say("Сервер недоступен"); break }
+    }catch(e){ console.error("upload",e); say("Сервер недоступен"); break }
   }
   addBtn.disabled=false;
-  if(done){ go(frames().length-1); setTimeout(idle,1600) }
+  if(!done)return;
+
+  /* перечитываем список с сервера: так видно, что кадр действительно сохранился */
+  const was=uploaded.length;
+  await load();
+  if(uploaded.length<was){ say("Кадр загрузился, но в хранилище его нет — проверьте Blob в Vercel"); return }
+  go(frames().length-1);
+  setTimeout(idle,1800);
 });
 
 async function removeShot(url){
