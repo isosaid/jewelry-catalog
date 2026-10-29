@@ -146,7 +146,7 @@ nav.menu a:hover{color:var(--dark-ink);border-color:var(--gold-soft)}
         <p class="eyebrow">Съёмки</p>
         <h2>Каждая линия со всех ракурсов</h2>
       </div>
-      <button class="addbtn" id="addBtn" type="button">
+      <button class="addbtn" id="addBtn" type="button" hidden>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
         Добавить кадры
       </button>
@@ -234,6 +234,9 @@ function go(i){
   mark();
 }
 function say(text){ hint.textContent=text }
+/* заметное сообщение вместо мелкой строки под лентой */
+function fail(text){ note.textContent=text; note.hidden=false; console.error(text) }
+function clearFail(){ note.hidden=true; note.textContent="" }
 function idle(){
   say(uploaded.length
     ? `Листайте свайпом или стрелками · загружено кадров: ${uploaded.length}`
@@ -259,8 +262,7 @@ async function load(){
     console.warn("api/shots недоступен:",e.message||e);
   }
   addBtn.hidden=!serverReady;
-  note.hidden=serverReady;
-  if(!serverReady)note.textContent="Загрузка кадров недоступна: "+why;
+  if(serverReady)clearFail(); else fail("Загрузка кадров недоступна: "+why);
   build(); idle();
 }
 
@@ -292,6 +294,7 @@ input.addEventListener("change",async()=>{
   if(!files.length)return;
 
   addBtn.disabled=true;
+  clearFail();
   let done=0;
   for(const file of files){
     say(`Загрузка ${done+1} из ${files.length}…`);
@@ -304,14 +307,14 @@ input.addEventListener("change",async()=>{
       });
       const j=await r.json().catch(()=>({}));
       if(!r.ok){
-        console.error("upload",r.status,j);
-        say(`${j.error||"Не удалось загрузить кадр"} (код ${r.status})`);
+        fail(`${j.error||"Не удалось загрузить кадр"} (код ${r.status})`);
+        say("Листайте свайпом или стрелками");
         break;
       }
       uploaded.push({url:j.url});
       done++;
       build();
-    }catch(e){ console.error("upload",e); say("Сервер недоступен"); break }
+    }catch(e){ fail("Сервер не ответил на загрузку: "+(e.message||e)); say("Листайте свайпом или стрелками"); break }
   }
   addBtn.disabled=false;
   if(!done)return;
@@ -319,7 +322,7 @@ input.addEventListener("change",async()=>{
   /* перечитываем список с сервера: так видно, что кадр действительно сохранился */
   const was=uploaded.length;
   await load();
-  if(uploaded.length<was){ say("Кадр загрузился, но в хранилище его нет — проверьте Blob в Vercel"); return }
+  if(uploaded.length<was){ fail("Кадр отправился, но в хранилище его нет — проверьте Blob в Vercel"); return }
   go(frames().length-1);
   setTimeout(idle,1800);
 });
@@ -332,10 +335,10 @@ async function removeShot(url){
       headers:{"content-type":"application/json"},
       body:JSON.stringify({url})
     });
-    if(!r.ok){ say("Не удалось убрать кадр"); return }
+    if(!r.ok){ fail("Не удалось убрать кадр (код "+r.status+")"); say("Листайте свайпом или стрелками"); return }
     uploaded=uploaded.filter(u=>u.url!==url);
     build(); idle();
-  }catch(e){ say("Сервер недоступен") }
+  }catch(e){ fail("Сервер не ответил на удаление: "+(e.message||e)); say("Листайте свайпом или стрелками") }
 }
 
 /* ── Листание ── */
