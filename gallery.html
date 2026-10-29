@@ -14,8 +14,10 @@
   --chrome:rgba(12,12,14,.55);
   color-scheme:dark;
 }
+*{box-sizing:border-box}
 html,body{height:100%}
-body{background:var(--bg);color:var(--fg);overflow:hidden;font-family:-apple-system,"Segoe UI",system-ui,sans-serif}
+body{margin:0;background:var(--bg);color:var(--fg);overflow:hidden;font-family:-apple-system,"Segoe UI",system-ui,sans-serif}
+img{max-width:100%}
 
 /* Фоновая съёмка во весь экран, поверх — вуаль, чтобы кадры не спорили с ней */
 .backdrop{position:fixed;inset:0;z-index:0;pointer-events:none;background:url("img/backdrop.webp") center center/cover no-repeat;filter:brightness(.38) saturate(.85)}
@@ -23,7 +25,9 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;font-family:-apple-sys
 
 .rail{
   position:relative;z-index:1;
-  height:100%;display:flex;
+  /* абсолютная высота, а не проценты: в iframe цепочка html→body→rail рвётся */
+  height:100vh;height:100dvh;
+  display:flex;
   overflow-x:auto;overflow-y:hidden;
   scroll-snap-type:x mandatory;
   -webkit-overflow-scrolling:touch;
@@ -38,7 +42,7 @@ body{background:var(--bg);color:var(--fg);overflow:hidden;font-family:-apple-sys
   padding:max(8px,env(safe-area-inset-left,0px)) max(8px,env(safe-area-inset-right,0px));
 }
 .slide img{
-  max-width:100%;max-height:100%;width:auto;height:auto;
+  max-width:100%;max-height:100%;min-width:0;min-height:0;width:auto;height:auto;
   object-fit:contain;display:block;
   box-shadow:0 20px 64px rgba(0,0,0,.6);
   transition:transform .35s ease;transform-origin:center center;

@@ -88,7 +88,7 @@ nav.menu a:hover{color:var(--dark-ink);border-color:var(--gold-soft)}
 .rail{display:flex;gap:0;height:clamp(340px,64vh,680px);overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;overscroll-behavior-x:contain}
 .rail::-webkit-scrollbar{display:none}
 .slide{flex:0 0 100%;min-width:0;height:100%;scroll-snap-align:center;scroll-snap-stop:always;display:grid;place-items:center;padding:0 4px}
-.slide img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;box-shadow:0 18px 52px rgba(0,0,0,.55)}
+.slide img{max-width:100%;max-height:100%;min-width:0;min-height:0;width:auto;height:auto;object-fit:contain;box-shadow:0 18px 52px rgba(0,0,0,.55)}
 .nav{position:absolute;top:50%;transform:translateY(-50%);z-index:2;width:44px;height:44px;border:none;border-radius:50%;background:rgba(10,10,13,.6);color:var(--dark-ink);display:none;place-items:center;cursor:pointer;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
 .nav:hover{background:rgba(10,10,13,.88)}
 .nav.prev{left:6px}
