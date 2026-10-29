@@ -82,11 +82,6 @@ nav.menu a:hover{color:var(--dark-ink);border-color:var(--gold-soft)}
 .badge{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--dark-ink);background:rgba(10,10,13,.7);padding:5px 9px;border-radius:2px;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
 .del{width:30px;height:30px;border:none;border-radius:50%;background:rgba(10,10,13,.7);color:var(--dark-ink);display:grid;place-items:center;cursor:pointer;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
 .del:hover{background:#8C2230;color:#fff}
-.keybox{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 18px;padding:14px 16px;border:1px solid var(--dark-line);border-radius:2px;background:rgba(236,236,239,.06)}
-.keybox label{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--dark-muted)}
-.keybox input{flex:1 1 160px;min-width:0;height:38px;padding:0 12px;border:1px solid var(--dark-line);border-radius:2px;background:rgba(10,10,13,.5);color:var(--dark-ink)}
-.keybox button{height:38px;padding:0 18px;border:1px solid var(--gold-soft);border-radius:2px;background:var(--gold-soft);color:#17140D;cursor:pointer}
-.keybox button:hover{background:var(--gold);border-color:var(--gold);color:#fff}
 .addbtn:disabled{opacity:.5;cursor:default}
 .stage{position:relative}
 .rail{display:flex;gap:0;height:clamp(340px,64vh,680px);overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;overscroll-behavior-x:contain}
@@ -157,11 +152,6 @@ nav.menu a:hover{color:var(--dark-ink);border-color:var(--gold-soft)}
       <a href="gallery.html">Открыть во весь экран</a>
     </div>
     <input type="file" id="addInput" accept="image/*" multiple hidden>
-    <form class="keybox" id="keyBox" hidden>
-      <label for="keyInput">Пароль загрузки</label>
-      <input type="password" id="keyInput" autocomplete="current-password" placeholder="••••••">
-      <button type="submit">Продолжить</button>
-    </form>
     <div class="stage">
       <div class="rail" id="rail" tabindex="0" aria-label="Съёмки изделий"></div>
       <button class="nav prev" id="prev" type="button" aria-label="Предыдущий кадр">
@@ -189,16 +179,10 @@ const dots=document.getElementById("dots");
 const hint=document.getElementById("hint");
 const addBtn=document.getElementById("addBtn");
 const input=document.getElementById("addInput");
-const keyBox=document.getElementById("keyBox");
-const keyInput=document.getElementById("keyInput");
 
 let index=0;
 let uploaded=[];      /* кадры из хранилища: {url} */
 let serverReady=false;
-
-const KEY="gs.key";
-const getKey=()=>{try{return sessionStorage.getItem(KEY)||""}catch(e){return ""}};
-const setKey=v=>{try{sessionStorage.setItem(KEY,v)}catch(e){}};
 
 /* ── Сборка ленты ── */
 function frames(){
@@ -288,25 +272,7 @@ const toBase64=blob=>new Promise((res,rej)=>{
   fr.readAsDataURL(blob);
 });
 
-async function askKey(){
-  if(getKey())return getKey();
-  keyBox.hidden=false;
-  keyInput.focus();
-  return new Promise(res=>{
-    keyBox.onsubmit=e=>{
-      e.preventDefault();
-      const v=keyInput.value.trim();
-      if(!v)return;
-      setKey(v); keyInput.value=""; keyBox.hidden=true; keyBox.onsubmit=null;
-      res(v);
-    };
-  });
-}
-
-addBtn.addEventListener("click",async()=>{
-  const k=await askKey();
-  if(k)input.click();
-});
+addBtn.addEventListener("click",()=>input.click());
 
 input.addEventListener("change",async()=>{
   const files=[...input.files].filter(f=>f.type.startsWith("image/"));
@@ -321,11 +287,10 @@ input.addEventListener("change",async()=>{
     try{
       const r=await fetch("api/upload",{
         method:"POST",
-        headers:{"content-type":"application/json","x-upload-key":getKey()},
+        headers:{"content-type":"application/json"},
         body:JSON.stringify({type:small.type||"image/webp",data:await toBase64(small)})
       });
       const j=await r.json().catch(()=>({}));
-      if(r.status===401){ setKey(""); say("Неверный пароль — нажмите «Добавить кадры» и введите заново"); break }
       if(!r.ok){ say(j.error||"Не удалось загрузить кадр"); break }
       uploaded.push({url:j.url});
       done++;
@@ -337,16 +302,13 @@ input.addEventListener("change",async()=>{
 });
 
 async function removeShot(url){
-  const k=await askKey();
-  if(!k)return;
   say("Убираем кадр…");
   try{
     const r=await fetch("api/delete",{
       method:"POST",
-      headers:{"content-type":"application/json","x-upload-key":k},
+      headers:{"content-type":"application/json"},
       body:JSON.stringify({url})
     });
-    if(r.status===401){ setKey(""); say("Неверный пароль"); return }
     if(!r.ok){ say("Не удалось убрать кадр"); return }
     uploaded=uploaded.filter(u=>u.url!==url);
     build(); idle();

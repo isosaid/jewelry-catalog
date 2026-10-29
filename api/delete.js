@@ -6,16 +6,6 @@ export default async function handler(req, res) {
     return;
   }
 
-  const pass = process.env.UPLOAD_PASSWORD;
-  if (!pass) {
-    res.status(503).json({ error: "Загрузка не настроена: не задан UPLOAD_PASSWORD" });
-    return;
-  }
-  if (req.headers["x-upload-key"] !== pass) {
-    res.status(401).json({ error: "Неверный пароль" });
-    return;
-  }
-
   const { url } = req.body || {};
   if (!url) {
     res.status(400).json({ error: "Не указан кадр" });
